@@ -2,6 +2,15 @@ import BloodRequest from '../models/BloodRequest.js';
 import Donation from '../models/Donation.js';
 import Inventory from '../models/Inventory.js';
 
+// Helper function to get hospital ID string (handles both populated and non-populated cases)
+const getHospitalIdString = (hospitalId) => {
+  if (!hospitalId) return null;
+  // If it's a populated object with _id, use the _id
+  if (hospitalId._id) return hospitalId._id.toString();
+  // Otherwise, it's just an ObjectId, use toString directly
+  return hospitalId.toString();
+};
+
 // Get Blood Requests (accessible by all authenticated users)
 export const getAllBloodRequests = async (req, res) => {
   try {
@@ -59,7 +68,7 @@ export const getBloodRequestById = async (req, res) => {
     // Authorization check
     const isOwner = req.user.role === 'USER' && request.requesterId._id.toString() === req.user._id.toString();
     const isHospitalStaff = (req.user.role === 'STAFF' || req.user.role === 'ADMIN') 
-      && request.hospitalId._id.toString() === req.user.hospitalId.toString();
+      && getHospitalIdString(request.hospitalId) === getHospitalIdString(req.user.hospitalId);
 
     if (!isOwner && !isHospitalStaff) {
       return res.status(403).json({ message: 'Access denied' });

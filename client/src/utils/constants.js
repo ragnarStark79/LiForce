@@ -20,12 +20,12 @@ export const REQUEST_STATUS = {
 };
 
 // Urgency levels - as array for dropdowns
-export const URGENCY_LEVELS = ['NORMAL', 'URGENT', 'CRITICAL'];
+export const URGENCY_LEVELS = ['NORMAL', 'HIGH', 'CRITICAL'];
 
 // Urgency levels object for reference
 export const URGENCY = {
   NORMAL: 'NORMAL',
-  URGENT: 'URGENT',
+  HIGH: 'HIGH',
   CRITICAL: 'CRITICAL',
 };
 

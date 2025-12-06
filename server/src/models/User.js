@@ -57,6 +57,27 @@ const userSchema = new mongoose.Schema(
     staffPosition: String,
     department: String,
     refreshToken: String,
+    // Profile Update Request fields for staff
+    pendingProfileUpdate: {
+      name: String,
+      email: String,
+      phone: String,
+      bloodGroup: String,
+      staffPosition: String,
+      department: String,
+      hospitalId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Hospital',
+      },
+      requestedAt: Date,
+      reason: String,
+    },
+    profileUpdateStatus: {
+      type: String,
+      enum: ['NONE', 'PENDING', 'APPROVED', 'REJECTED'],
+      default: 'NONE',
+    },
+    profileUpdateRejectionReason: String,
     settings: {
       emailNotifications: { type: Boolean, default: true },
       smsNotifications: { type: Boolean, default: true },

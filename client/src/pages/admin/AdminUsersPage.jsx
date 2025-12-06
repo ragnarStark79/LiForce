@@ -11,6 +11,7 @@ import Pagination from '../../components/common/Pagination';
 import { adminService } from '../../services/adminService';
 import { BLOOD_GROUPS } from '../../utils/constants';
 import { formatDate } from '../../utils/formatters';
+import toast from 'react-hot-toast';
 
 const AdminUsersPage = () => {
   const [loading, setLoading] = useState(true);
@@ -57,7 +58,7 @@ const AdminUsersPage = () => {
       setPagination(prev => ({
         ...prev,
         total: response.total || 0,
-        pages: response.pages || 0,
+        pages: response.totalPages || 0,
       }));
       setStats({
         totalUsers: response.totalUsers || response.total || 0,
@@ -67,6 +68,7 @@ const AdminUsersPage = () => {
       });
     } catch (error) {
       console.error('Failed to fetch users:', error);
+      toast.error('Failed to load users');
     } finally {
       setLoading(false);
     }
@@ -89,13 +91,15 @@ const AdminUsersPage = () => {
     try {
       setActionLoading(true);
       await adminService.suspendUser(userId);
-      fetchUsers();
-      if (showUserModal) {
-        setSelectedUser(prev => prev ? { ...prev, status: 'suspended' } : null);
+      toast.success('User suspended successfully');
+      // Update local state immediately
+      setUsers(prev => prev.map(u => u._id === userId ? { ...u, status: 'SUSPENDED' } : u));
+      if (selectedUser && selectedUser._id === userId) {
+        setSelectedUser(prev => prev ? { ...prev, status: 'SUSPENDED' } : null);
       }
     } catch (error) {
       console.error('Failed to suspend user:', error);
-      alert('Failed to suspend user. Please try again.');
+      toast.error('Failed to suspend user');
     } finally {
       setActionLoading(false);
     }
@@ -105,29 +109,38 @@ const AdminUsersPage = () => {
     try {
       setActionLoading(true);
       await adminService.activateUser(userId);
-      fetchUsers();
-      if (showUserModal) {
-        setSelectedUser(prev => prev ? { ...prev, status: 'active' } : null);
+      toast.success('User activated successfully');
+      // Update local state immediately
+      setUsers(prev => prev.map(u => u._id === userId ? { ...u, status: 'ACTIVE' } : u));
+      if (selectedUser && selectedUser._id === userId) {
+        setSelectedUser(prev => prev ? { ...prev, status: 'ACTIVE' } : null);
       }
     } catch (error) {
       console.error('Failed to activate user:', error);
-      alert('Failed to activate user. Please try again.');
+      toast.error('Failed to activate user');
     } finally {
       setActionLoading(false);
     }
   };
 
   const getStatusBadge = (status) => {
-    switch (status) {
-      case 'active':
+    const statusUpper = (status || 'ACTIVE').toUpperCase();
+    switch (statusUpper) {
+      case 'ACTIVE':
         return <Badge variant="success">Active</Badge>;
-      case 'suspended':
+      case 'SUSPENDED':
         return <Badge variant="danger">Suspended</Badge>;
-      case 'inactive':
-        return <Badge variant="warning">Inactive</Badge>;
+      case 'PENDING':
+        return <Badge variant="warning">Pending</Badge>;
       default:
         return <Badge variant="secondary">{status}</Badge>;
     }
+  };
+
+  // Check if user is suspended (handles both cases)
+  const isUserSuspended = (user) => {
+    const status = (user.status || 'ACTIVE').toUpperCase();
+    return status === 'SUSPENDED';
   };
 
   const bloodGroupOptions = [
@@ -137,9 +150,8 @@ const AdminUsersPage = () => {
 
   const statusOptions = [
     { value: '', label: 'All Status' },
-    { value: 'active', label: 'Active' },
-    { value: 'suspended', label: 'Suspended' },
-    { value: 'inactive', label: 'Inactive' },
+    { value: 'ACTIVE', label: 'Active' },
+    { value: 'SUSPENDED', label: 'Suspended' },
   ];
 
   return (
@@ -224,7 +236,7 @@ const AdminUsersPage = () => {
                     <th className="text-left py-3 px-4 font-medium text-neutral-600">User</th>
                     <th className="text-left py-3 px-4 font-medium text-neutral-600">Blood Group</th>
                     <th className="text-left py-3 px-4 font-medium text-neutral-600">Phone</th>
-                    <th className="text-center py-3 px-4 font-medium text-neutral-600">Donations</th>
+                    <th className="text-left py-3 px-4 font-medium text-neutral-600">Location</th>
                     <th className="text-center py-3 px-4 font-medium text-neutral-600">Status</th>
                     <th className="text-left py-3 px-4 font-medium text-neutral-600">Joined</th>
                     <th className="text-right py-3 px-4 font-medium text-neutral-600">Actions</th>
@@ -237,12 +249,12 @@ const AdminUsersPage = () => {
                         <div className="flex items-center gap-3">
                           <Avatar 
                             src={user.avatar} 
-                            name={`${user.firstName} ${user.lastName}`}
+                            name={user.name}
                             size="sm"
                           />
                           <div>
                             <p className="font-medium text-neutral-800">
-                              {user.firstName} {user.lastName}
+                              {user.name}
                             </p>
                             <p className="text-sm text-neutral-500">{user.email}</p>
                           </div>
@@ -254,13 +266,11 @@ const AdminUsersPage = () => {
                       <td className="py-3 px-4 text-neutral-600">
                         {user.phone || 'N/A'}
                       </td>
-                      <td className="text-center py-3 px-4">
-                        <span className="font-medium text-neutral-800">
-                          {user.donationCount || 0}
-                        </span>
+                      <td className="py-3 px-4 text-neutral-600">
+                        {user.city && user.state ? `${user.city}, ${user.state}` : user.city || user.state || 'N/A'}
                       </td>
                       <td className="text-center py-3 px-4">
-                        {getStatusBadge(user.status || 'active')}
+                        {getStatusBadge(user.status)}
                       </td>
                       <td className="py-3 px-4 text-neutral-600">
                         {formatDate(user.createdAt)}
@@ -274,7 +284,7 @@ const AdminUsersPage = () => {
                           >
                             View
                           </Button>
-                          {user.status === 'suspended' ? (
+                          {isUserSuspended(user) ? (
                             <Button 
                               variant="success" 
                               size="sm"
@@ -328,21 +338,22 @@ const AdminUsersPage = () => {
           setSelectedUser(null);
         }}
         title="User Details"
+        size="lg"
       >
         {selectedUser && (
           <div className="space-y-6">
             <div className="flex items-center gap-4">
               <Avatar 
                 src={selectedUser.avatar} 
-                name={`${selectedUser.firstName} ${selectedUser.lastName}`}
+                name={selectedUser.name}
                 size="lg"
               />
               <div>
                 <h3 className="text-xl font-semibold text-neutral-800">
-                  {selectedUser.firstName} {selectedUser.lastName}
+                  {selectedUser.name}
                 </h3>
                 <p className="text-neutral-600">{selectedUser.email}</p>
-                {getStatusBadge(selectedUser.status || 'active')}
+                <div className="mt-1">{getStatusBadge(selectedUser.status)}</div>
               </div>
             </div>
 
@@ -360,9 +371,9 @@ const AdminUsersPage = () => {
                 </p>
               </div>
               <div className="bg-neutral-50 p-4 rounded-lg">
-                <p className="text-sm text-neutral-500">Total Donations</p>
-                <p className="text-lg font-semibold text-success-600">
-                  {selectedUser.donationCount || 0}
+                <p className="text-sm text-neutral-500">Email Verified</p>
+                <p className="text-lg font-semibold text-neutral-800">
+                  {selectedUser.isEmailVerified ? '✅ Yes' : '❌ No'}
                 </p>
               </div>
               <div className="bg-neutral-50 p-4 rounded-lg">
@@ -373,22 +384,33 @@ const AdminUsersPage = () => {
               </div>
             </div>
 
-            {selectedUser.address && (
-              <div className="bg-neutral-50 p-4 rounded-lg">
-                <p className="text-sm text-neutral-500">Address</p>
-                <p className="text-neutral-800">
-                  {selectedUser.address.street && `${selectedUser.address.street}, `}
-                  {selectedUser.address.city && `${selectedUser.address.city}, `}
-                  {selectedUser.address.state && `${selectedUser.address.state} `}
-                  {selectedUser.address.zipCode}
-                </p>
+            {/* Address Section */}
+            <div className="bg-neutral-50 p-4 rounded-lg">
+              <p className="text-sm text-neutral-500 mb-2">Address</p>
+              <div className="grid grid-cols-2 gap-2 text-neutral-800">
+                <div>
+                  <span className="text-xs text-neutral-400">Street:</span>
+                  <p>{selectedUser.address || 'Not provided'}</p>
+                </div>
+                <div>
+                  <span className="text-xs text-neutral-400">City:</span>
+                  <p>{selectedUser.city || 'Not provided'}</p>
+                </div>
+                <div>
+                  <span className="text-xs text-neutral-400">State:</span>
+                  <p>{selectedUser.state || 'Not provided'}</p>
+                </div>
+                <div>
+                  <span className="text-xs text-neutral-400">ZIP Code:</span>
+                  <p>{selectedUser.zipCode || 'Not provided'}</p>
+                </div>
               </div>
-            )}
+            </div>
 
-            {selectedUser.lastDonation && (
+            {selectedUser.lastDonationDate && (
               <div className="bg-neutral-50 p-4 rounded-lg">
                 <p className="text-sm text-neutral-500">Last Donation</p>
-                <p className="text-neutral-800">{formatDate(selectedUser.lastDonation)}</p>
+                <p className="text-neutral-800">{formatDate(selectedUser.lastDonationDate)}</p>
               </div>
             )}
 
@@ -399,7 +421,7 @@ const AdminUsersPage = () => {
               >
                 Close
               </Button>
-              {selectedUser.status === 'suspended' ? (
+              {isUserSuspended(selectedUser) ? (
                 <Button 
                   variant="success"
                   onClick={() => handleActivateUser(selectedUser._id)}

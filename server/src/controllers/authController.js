@@ -63,7 +63,7 @@ export const registerUser = async (req, res) => {
 // Register Staff
 export const registerStaff = async (req, res) => {
   try {
-    const { name, email, password, phone, hospitalId, staffPosition, department } = req.body;
+    const { name, email, password, phone, hospitalId, staffPosition, department, bloodGroup } = req.body;
 
     // Check if user exists
     const existingUser = await User.findOne({ email });
@@ -86,6 +86,7 @@ export const registerStaff = async (req, res) => {
       hospitalId,
       staffPosition,
       department,
+      bloodGroup,
       role: 'STAFF',
       status: 'PENDING', // Staff must be approved by admin
     });

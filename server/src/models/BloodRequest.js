@@ -9,7 +9,7 @@ const bloodRequestSchema = new mongoose.Schema(
     },
     requesterId: {
       type: mongoose.Schema.Types.ObjectId,
-      refPath: 'requesterType',
+      ref: 'User', // Changed from refPath - always reference User for simplicity
       required: true,
     },
     hospitalId: {

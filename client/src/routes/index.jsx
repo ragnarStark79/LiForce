@@ -28,13 +28,16 @@ import UserSettingsPage from '../pages/user/UserSettingsPage';
 import UserBloodRequestsPage from '../pages/user/UserBloodRequestsPage';
 import UserDonationsPage from '../pages/user/UserDonationsPage';
 import UserChatPage from '../pages/user/UserChatPage';
+import DonationSchedulePage from '../pages/user/DonationSchedulePage';
 
 // Staff Pages
 import StaffDashboardPage from '../pages/staff/StaffDashboardPage';
+import StaffProfilePage from '../pages/staff/StaffProfilePage';
 import StaffPatientsPage from '../pages/staff/StaffPatientsPage';
 import StaffBloodRequestsPage from '../pages/staff/StaffBloodRequestsPage';
 import StaffInventoryPage from '../pages/staff/StaffInventoryPage';
 import StaffChatPage from '../pages/staff/StaffChatPage';
+import StaffDonationSchedulesPage from '../pages/staff/StaffDonationSchedulesPage';
 
 // Admin Pages
 import AdminDashboardPage from '../pages/admin/AdminDashboardPage';
@@ -121,6 +124,10 @@ const router = createBrowserRouter([
         element: <UserDonationsPage />,
       },
       {
+        path: 'schedule-donation',
+        element: <DonationSchedulePage />,
+      },
+      {
         path: 'chat',
         element: <UserChatPage />,
       },
@@ -143,6 +150,10 @@ const router = createBrowserRouter([
         element: <StaffDashboardPage />,
       },
       {
+        path: 'profile',
+        element: <StaffProfilePage />,
+      },
+      {
         path: 'patients',
         element: <StaffPatientsPage />,
       },
@@ -153,6 +164,10 @@ const router = createBrowserRouter([
       {
         path: 'inventory',
         element: <StaffInventoryPage />,
+      },
+      {
+        path: 'donation-schedules',
+        element: <StaffDonationSchedulesPage />,
       },
       {
         path: 'chat',

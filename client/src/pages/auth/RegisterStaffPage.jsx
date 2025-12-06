@@ -4,7 +4,7 @@ import Input from '../../components/common/Input';
 import Select from '../../components/common/Select';
 import Button from '../../components/common/Button';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
-import { STAFF_POSITIONS } from '../../utils/constants';
+import { STAFF_POSITIONS, BLOOD_GROUPS } from '../../utils/constants';
 import { authService } from '../../services/authService';
 import apiClient from '../../services/apiClient';
 
@@ -18,6 +18,7 @@ const RegisterStaffPage = () => {
     hospitalId: '',
     position: '',
     department: '',
+    bloodGroup: '',
   });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
@@ -91,6 +92,7 @@ const RegisterStaffPage = () => {
         hospitalId: formData.hospitalId,
         staffPosition: formData.position,
         department: formData.department,
+        bloodGroup: formData.bloodGroup,
       };
       
       await authService.registerStaff(staffData);
@@ -162,6 +164,18 @@ const RegisterStaffPage = () => {
           placeholder="+1 (555) 000-0000"
           required
           error={errors.phone}
+        />
+
+        <Select
+          label="Blood Group"
+          name="bloodGroup"
+          value={formData.bloodGroup}
+          onChange={handleChange}
+          options={[
+            { value: '', label: 'Select Blood Group' },
+            ...BLOOD_GROUPS.map(bg => ({ value: bg, label: bg }))
+          ]}
+          error={errors.bloodGroup}
         />
 
         <Select

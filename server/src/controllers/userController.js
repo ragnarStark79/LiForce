@@ -1,6 +1,7 @@
 import User from '../models/User.js';
 import Donation from '../models/Donation.js';
 import BloodRequest from '../models/BloodRequest.js';
+import DonationSchedule from '../models/DonationSchedule.js';
 
 // Get User Dashboard Data
 export const getDashboard = async (req, res) => {
@@ -221,6 +222,124 @@ export const cancelBloodRequest = async (req, res) => {
 
     res.json({ message: 'Request cancelled successfully', request });
   } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// ==================== DONATION SCHEDULING ====================
+
+// Create Donation Schedule
+export const createDonationSchedule = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const user = await User.findById(userId);
+    
+    const { hospitalId, scheduledDate, scheduledTime, notes } = req.body;
+
+    if (!hospitalId || !scheduledDate || !scheduledTime) {
+      return res.status(400).json({ 
+        message: 'Hospital, scheduled date, and time are required' 
+      });
+    }
+
+    // Check if user already has a pending schedule
+    const existingSchedule = await DonationSchedule.findOne({
+      donorId: userId,
+      status: { $in: ['PENDING', 'ASSIGNED', 'CONFIRMED'] }
+    });
+
+    if (existingSchedule) {
+      return res.status(400).json({ 
+        message: 'You already have a pending donation schedule. Please cancel it first or wait for completion.' 
+      });
+    }
+
+    const schedule = await DonationSchedule.create({
+      donorId: userId,
+      hospitalId,
+      scheduledDate: new Date(scheduledDate),
+      scheduledTime,
+      donorName: user.name,
+      donorPhone: user.phone,
+      donorBloodGroup: user.bloodGroup,
+      donorAddress: user.address ? `${user.address}, ${user.city || ''}, ${user.state || ''} ${user.zipCode || ''}`.trim() : '',
+      notes,
+      status: 'PENDING'
+    });
+
+    const populatedSchedule = await DonationSchedule.findById(schedule._id)
+      .populate('hospitalId', 'name address city state phone');
+
+    res.status(201).json({
+      message: 'Donation scheduled successfully! A staff member will contact you soon.',
+      schedule: populatedSchedule
+    });
+  } catch (error) {
+    console.error('Create donation schedule error:', error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Get User's Donation Schedules
+export const getDonationSchedules = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { page = 1, limit = 10, status } = req.query;
+
+    const query = { donorId: userId };
+    if (status && status !== 'all') {
+      query.status = status;
+    }
+
+    const schedules = await DonationSchedule.find(query)
+      .populate('hospitalId', 'name address city state phone')
+      .populate('assignedStaffId', 'name phone')
+      .sort({ scheduledDate: -1 })
+      .limit(parseInt(limit))
+      .skip((parseInt(page) - 1) * parseInt(limit));
+
+    const total = await DonationSchedule.countDocuments(query);
+
+    res.json({
+      schedules,
+      totalPages: Math.ceil(total / parseInt(limit)),
+      currentPage: parseInt(page),
+      total
+    });
+  } catch (error) {
+    console.error('Get donation schedules error:', error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Cancel Donation Schedule
+export const cancelDonationSchedule = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { scheduleId } = req.params;
+    const { reason } = req.body;
+
+    const schedule = await DonationSchedule.findOne({
+      _id: scheduleId,
+      donorId: userId
+    });
+
+    if (!schedule) {
+      return res.status(404).json({ message: 'Schedule not found' });
+    }
+
+    if (['COMPLETED', 'CANCELLED'].includes(schedule.status)) {
+      return res.status(400).json({ message: 'Cannot cancel this schedule' });
+    }
+
+    schedule.status = 'CANCELLED';
+    schedule.cancelledAt = new Date();
+    schedule.cancellationReason = reason || 'Cancelled by donor';
+    await schedule.save();
+
+    res.json({ message: 'Donation schedule cancelled successfully', schedule });
+  } catch (error) {
+    console.error('Cancel donation schedule error:', error);
     res.status(500).json({ message: error.message });
   }
 };

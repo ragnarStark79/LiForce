@@ -90,7 +90,7 @@ const StaffInventoryPage = () => {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card className="bg-gradient-to-br from-primary-50 to-primary-100">
+        <Card className="bg-linear-to-br from-primary-50 to-primary-100">
           <div className="text-center">
             <div className="text-3xl font-bold text-primary-700">
               {inventory.reduce((sum, item) => sum + (item.unitsAvailable || 0), 0)}
@@ -98,7 +98,7 @@ const StaffInventoryPage = () => {
             <p className="text-sm text-primary-600 mt-1">Total Units</p>
           </div>
         </Card>
-        <Card className="bg-gradient-to-br from-green-50 to-green-100">
+        <Card className="bg-linear-to-br from-green-50 to-green-100">
           <div className="text-center">
             <div className="text-3xl font-bold text-green-700">
               {inventory.filter((i) => (i.unitsAvailable || 0) >= 10).length}
@@ -106,7 +106,7 @@ const StaffInventoryPage = () => {
             <p className="text-sm text-green-600 mt-1">Well Stocked</p>
           </div>
         </Card>
-        <Card className="bg-gradient-to-br from-yellow-50 to-yellow-100">
+        <Card className="bg-linear-to-br from-yellow-50 to-yellow-100">
           <div className="text-center">
             <div className="text-3xl font-bold text-yellow-700">
               {inventory.filter((i) => (i.unitsAvailable || 0) > 0 && (i.unitsAvailable || 0) < 5).length}
@@ -114,7 +114,7 @@ const StaffInventoryPage = () => {
             <p className="text-sm text-yellow-600 mt-1">Low Stock</p>
           </div>
         </Card>
-        <Card className="bg-gradient-to-br from-red-50 to-red-100">
+        <Card className="bg-linear-to-br from-red-50 to-red-100">
           <div className="text-center">
             <div className="text-3xl font-bold text-red-700">
               {inventory.filter((i) => (i.unitsAvailable || 0) === 0).length}

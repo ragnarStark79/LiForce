@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
+import { useNotification } from '../../components/common/NotificationSystem';
 import Input from '../../components/common/Input';
 import Button from '../../components/common/Button';
 import Checkbox from '../../components/common/Checkbox';
@@ -15,6 +16,7 @@ const LoginPage = () => {
   const [loading, setLoading] = useState(false);
 
   const { login } = useAuth();
+  const { notify } = useNotification();
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -47,25 +49,26 @@ const LoginPage = () => {
 
     try {
       const user = await login({ email: formData.email, password: formData.password });
+      notify.login(user.name);
       const redirectPath = getRedirectPath(user.role);
       navigate(redirectPath);
     } catch (error) {
-      setErrors({ 
-        general: error.response?.data?.message || 'Login failed. Please try again.' 
-      });
+      const message = error.response?.data?.message || 'Login failed. Please try again.';
+      setErrors({ general: message });
+      notify.error(message);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div>
+    <div className="fade-in">
       <h2 className="text-2xl font-bold text-neutral-800 mb-6 text-center">
         Welcome Back
       </h2>
 
       {errors.general && (
-        <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
+        <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm shake">
           {errors.general}
         </div>
       )}

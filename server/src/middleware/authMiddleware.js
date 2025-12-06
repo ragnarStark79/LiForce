@@ -16,8 +16,10 @@ export const authMiddleware = async (req, res, next) => {
     // Verify token
     const decoded = jwt.verify(token, config.jwtSecret);
 
-    // Get user from token
-    const user = await User.findById(decoded.userId).select('-password -refreshToken');
+    // Get user from token - populate hospitalId for staff users
+    const user = await User.findById(decoded.userId)
+      .select('-password -refreshToken')
+      .populate('hospitalId', 'name address city state phone email code');
 
     if (!user) {
       return res.status(401).json({ message: 'User not found' });

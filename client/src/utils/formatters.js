@@ -1,17 +1,29 @@
-import { format, formatDistanceToNow, parseISO } from 'date-fns';
+import { format, formatDistanceToNow, parseISO, isValid } from 'date-fns';
 
 // Format date to readable string
 export const formatDate = (date, formatStr = 'MMM dd, yyyy') => {
   if (!date) return '';
-  const dateObj = typeof date === 'string' ? parseISO(date) : date;
-  return format(dateObj, formatStr);
+  try {
+    const dateObj = typeof date === 'string' ? parseISO(date) : new Date(date);
+    if (!isValid(dateObj)) return '';
+    return format(dateObj, formatStr);
+  } catch (error) {
+    console.warn('Invalid date value:', date);
+    return '';
+  }
 };
 
 // Format date to relative time (e.g., "2 hours ago")
 export const formatRelativeTime = (date) => {
   if (!date) return '';
-  const dateObj = typeof date === 'string' ? parseISO(date) : date;
-  return formatDistanceToNow(dateObj, { addSuffix: true });
+  try {
+    const dateObj = typeof date === 'string' ? parseISO(date) : new Date(date);
+    if (!isValid(dateObj)) return '';
+    return formatDistanceToNow(dateObj, { addSuffix: true });
+  } catch (error) {
+    console.warn('Invalid date value:', date);
+    return '';
+  }
 };
 
 // Format phone number

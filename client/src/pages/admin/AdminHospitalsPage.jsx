@@ -17,6 +17,7 @@ const AdminHospitalsPage = () => {
   const [formLoading, setFormLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
+    code: '',
     email: '',
     phone: '',
     address: '',
@@ -49,6 +50,7 @@ const AdminHospitalsPage = () => {
   const resetForm = () => {
     setFormData({
       name: '',
+      code: '',
       email: '',
       phone: '',
       address: '',
@@ -111,6 +113,7 @@ const AdminHospitalsPage = () => {
     setSelectedHospital(hospital);
     setFormData({
       name: hospital.name || '',
+      code: hospital.code || '',
       email: hospital.email || '',
       phone: hospital.phone || '',
       address: hospital.address || '',
@@ -240,6 +243,7 @@ const AdminHospitalsPage = () => {
         <form onSubmit={handleAddHospital} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Input label="Hospital Name" name="name" value={formData.name} onChange={handleChange} placeholder="City General Hospital" required />
+            <Input label="Hospital Code" name="code" value={formData.code} onChange={handleChange} placeholder="CGH" required />
             <Input label="Email" type="email" name="email" value={formData.email} onChange={handleChange} placeholder="contact@hospital.com" required />
             <Input label="Phone" name="phone" value={formData.phone} onChange={handleChange} placeholder="+1 (555) 000-0000" required />
             <Input label="Emergency Contact" name="emergencyContact" value={formData.emergencyContact} onChange={handleChange} placeholder="+1 (555) 000-0001" />
@@ -271,6 +275,7 @@ const AdminHospitalsPage = () => {
         <form onSubmit={handleEditHospital} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Input label="Hospital Name" name="name" value={formData.name} onChange={handleChange} placeholder="City General Hospital" required />
+            <Input label="Hospital Code" name="code" value={formData.code} onChange={handleChange} placeholder="CGH" disabled />
             <Input label="Email" type="email" name="email" value={formData.email} onChange={handleChange} placeholder="contact@hospital.com" required />
             <Input label="Phone" name="phone" value={formData.phone} onChange={handleChange} placeholder="+1 (555) 000-0000" required />
             <Input label="Emergency Contact" name="emergencyContact" value={formData.emergencyContact} onChange={handleChange} placeholder="+1 (555) 000-0001" />

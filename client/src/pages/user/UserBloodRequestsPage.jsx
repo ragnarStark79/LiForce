@@ -7,11 +7,12 @@ import Modal from '../../components/common/Modal';
 import Badge from '../../components/common/Badge';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import { userService } from '../../services/userService';
+import { useNotification } from '../../components/common/NotificationSystem';
 import { BLOOD_GROUPS, URGENCY_LEVELS } from '../../utils/constants';
 import { formatDate } from '../../utils/formatters';
-import toast from 'react-hot-toast';
 
 const UserBloodRequestsPage = () => {
+  const { notify } = useNotification();
   const [loading, setLoading] = useState(true);
   const [requests, setRequests] = useState([]);
   const [hospitals, setHospitals] = useState([]);
@@ -39,7 +40,7 @@ const UserBloodRequestsPage = () => {
       setRequests(data.requests || []);
     } catch (error) {
       console.error('Failed to fetch requests:', error);
-      toast.error('Failed to load requests');
+      notify.error('Failed to load requests');
     } finally {
       setLoading(false);
     }
@@ -58,23 +59,23 @@ const UserBloodRequestsPage = () => {
     if (!window.confirm('Are you sure you want to cancel this request?')) return;
     try {
       await userService.cancelBloodRequest(requestId);
-      toast.success('Request cancelled successfully');
+      notify.info('Blood request has been cancelled');
       fetchRequests();
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to cancel request');
+      notify.error(error.response?.data?.message || 'Failed to cancel request');
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.hospitalId || !formData.bloodGroup) {
-      toast.error('Please select hospital and blood group');
+      notify.warning('Please select hospital and blood group');
       return;
     }
     try {
       setFormLoading(true);
       await userService.createBloodRequest(formData);
-      toast.success('Blood request created successfully!');
+      notify.request('Your blood request has been submitted successfully!');
       setShowNewRequestModal(false);
       setFormData({
         hospitalId: '',
@@ -87,7 +88,7 @@ const UserBloodRequestsPage = () => {
       });
       fetchRequests();
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to create request');
+      notify.error(error.response?.data?.message || 'Failed to create request');
     } finally {
       setFormLoading(false);
     }
@@ -112,7 +113,7 @@ const UserBloodRequestsPage = () => {
   const getUrgencyBadge = (urgency) => {
     const variants = {
       NORMAL: 'secondary',
-      URGENT: 'warning',
+      HIGH: 'warning',
       CRITICAL: 'error',
     };
     return <Badge variant={variants[urgency] || 'secondary'}>{urgency}</Badge>;

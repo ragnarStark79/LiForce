@@ -11,6 +11,17 @@ import {
   getAnalytics,
   suspendUser,
   activateUser,
+  getAllHospitals,
+  createHospital,
+  updateHospitalById,
+  deleteHospital,
+  reactivateHospital,
+  getActivityLogs,
+  getMetrics,
+  toggleUserStatus,
+  getPendingProfileUpdates,
+  approveProfileUpdate,
+  rejectProfileUpdate,
 } from '../controllers/adminController.js';
 import { authMiddleware } from '../middleware/authMiddleware.js';
 import { roleMiddleware } from '../middleware/roleMiddleware.js';
@@ -35,11 +46,32 @@ router.get('/users', getAllUsers);
 router.put('/users/:userId/suspend', suspendUser);
 router.put('/users/:userId/activate', activateUser);
 
-// Hospital Management
+// Toggle user status (alternative to suspend/activate)
+router.put('/users/:userId/toggle-status', toggleUserStatus);
+
+// Hospital Management (own hospital)
 router.get('/hospital', getHospital);
 router.put('/hospital', updateHospital);
 
+// Hospital Management (all hospitals - for super admin)
+router.get('/hospitals', getAllHospitals);
+router.post('/hospitals', createHospital);
+router.put('/hospitals/:hospitalId', updateHospitalById);
+router.delete('/hospitals/:hospitalId', deleteHospital);
+router.put('/hospitals/:hospitalId/reactivate', reactivateHospital);
+
 // Analytics
 router.get('/analytics', getAnalytics);
+
+// Activity Logs
+router.get('/activity-logs', getActivityLogs);
+
+// Metrics
+router.get('/metrics', getMetrics);
+
+// Profile Update Approvals
+router.get('/profile-updates/pending', getPendingProfileUpdates);
+router.put('/profile-updates/:staffId/approve', approveProfileUpdate);
+router.put('/profile-updates/:staffId/reject', rejectProfileUpdate);
 
 export default router;
