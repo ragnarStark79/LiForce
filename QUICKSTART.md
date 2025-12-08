@@ -88,10 +88,6 @@ cd server && npm run dev
 - Password: `Admin@123456`
 - You'll see the admin dashboard
 
-### 4. Approve Staff (TODO - Needs Implementation)
-- This feature needs to be implemented
-- Admin should be able to approve staff from the dashboard
-
 ## 📁 Project Structure Overview
 
 ```
@@ -120,33 +116,6 @@ liforce/
 └── README.md                  # Full Documentation
 ```
 
-## 🎨 Design Features
-
-- **Soft Pastel Colors**: Japanese-inspired calm aesthetic
-- **Smooth Animations**: Subtle transitions and hover effects
-- **Responsive Design**: Mobile-friendly (in progress)
-- **Dark Mode**: Toggle between light and dark themes
-
-## 🔑 Key Features Currently Working
-
-✅ User Registration & Login
-✅ Staff Registration (awaits approval)
-✅ Admin Login
-✅ Role-Based Dashboards
-✅ Protected Routes
-✅ JWT Authentication
-✅ Beautiful UI Components
-
-## ⚠️ Features Still TODO
-
-- Staff approval by admin
-- Blood request management
-- Inventory management
-- Real-time chat
-- Notifications
-- Profile editing with API
-- Password reset emails
-- And more... (see PROJECT_STATUS.md)
 
 ## 🐛 Troubleshooting
 
