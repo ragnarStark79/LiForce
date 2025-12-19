@@ -6,6 +6,19 @@ import StaffApprovalTable from '../../components/admin/StaffApprovalTable';
 import { useAuth } from '../../hooks/useAuth';
 import { useNotification } from '../../components/common/NotificationSystem';
 import { adminService } from '../../services/adminService';
+import {
+  UsersIcon,
+  HospitalIcon,
+  UserIcon,
+  ChartIcon,
+  SettingsIcon,
+  DropletIcon,
+  ArrowRightIcon,
+  CheckIcon,
+  ServerIcon,
+  ZapIcon,
+  ActivityIcon
+} from '../../components/common/DashboardIcons';
 
 const AdminDashboardPage = () => {
   const { user } = useAuth();
@@ -63,14 +76,6 @@ const AdminDashboardPage = () => {
     }
   };
 
-  const quickActions = [
-    { label: 'Staff Approvals', icon: '👥', path: '/admin/staff-approvals', gradient: 'from-blue-500 to-indigo-600', count: pendingStaff.length },
-    { label: 'Hospitals', icon: '🏥', path: '/admin/hospitals', gradient: 'from-emerald-500 to-teal-600' },
-    { label: 'All Users', icon: '👤', path: '/admin/users', gradient: 'from-purple-500 to-violet-600' },
-    { label: 'Analytics', icon: '📊', path: '/admin/analytics', gradient: 'from-pink-500 to-rose-600' },
-    { label: 'Settings', icon: '⚙️', path: '/admin/settings', gradient: 'from-gray-500 to-slate-600' },
-  ];
-
   const bloodGroups = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
 
   if (loading) {
@@ -81,136 +86,102 @@ const AdminDashboardPage = () => {
     );
   }
 
-  return (
-    <div className="space-y-8 fade-in">
-      {/* Hero Section */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-purple-600 via-violet-600 to-indigo-700 p-8 shadow-2xl">
-        {/* Animated Background */}
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute -top-20 -right-20 w-64 h-64 bg-white/10 rounded-full blur-3xl animate-float" />
-          <div className="absolute -bottom-20 -left-20 w-80 h-80 bg-violet-300/20 rounded-full blur-3xl animate-float" 
-               style={{ animationDelay: '1s' }} />
-          <div className="absolute top-1/2 right-1/4 w-40 h-40 bg-indigo-300/20 rounded-full blur-2xl animate-pulse" />
-          {/* Grid pattern */}
-          <div className="absolute inset-0 opacity-10" style={{
-            backgroundImage: 'linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)',
-            backgroundSize: '30px 30px'
-          }} />
-        </div>
+  const quickActions = [
+    { label: 'Approvals', icon: UsersIcon, path: '/admin/staff-approvals', count: pendingStaff.length, color: 'warning' },
+    { label: 'Hospitals', icon: HospitalIcon, path: '/admin/hospitals', color: 'info' },
+    { label: 'Users', icon: UserIcon, path: '/admin/users', color: 'success' },
+    { label: 'Analytics', icon: ChartIcon, path: '/admin/analytics', color: 'admin-theme' },
+    { label: 'Settings', icon: SettingsIcon, path: '/admin/settings', color: 'staff-theme' },
+  ];
 
-        <div className="relative z-10">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-            <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full 
-                             text-white/90 text-sm font-medium mb-4">
-                <span className="text-lg">👑</span>
-                Administrator
-              </div>
-              <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
-                Admin Control Center
-              </h1>
-              <p className="text-white/80 text-lg">
-                Welcome back, {user?.name}
-              </p>
-              <p className="text-white/60 text-sm mt-1">
-                Managing the LifeForce blood donation network
-              </p>
-            </div>
-            
-            <div className="flex flex-col items-start md:items-end gap-3">
-              <div className="grid grid-cols-2 gap-3">
-                <div className="px-4 py-3 bg-white/20 backdrop-blur-sm rounded-xl text-center">
-                  <p className="text-2xl font-bold text-white">{stats.totalUsers || 0}</p>
-                  <p className="text-white/70 text-xs">Total Users</p>
-                </div>
-                <div className="px-4 py-3 bg-white/20 backdrop-blur-sm rounded-xl text-center">
-                  <p className="text-2xl font-bold text-white">{stats.totalStaff || 0}</p>
-                  <p className="text-white/70 text-xs">Staff Members</p>
-                </div>
-              </div>
-              <button 
-                onClick={() => navigate('/admin/settings')}
-                className="text-white/80 hover:text-white text-sm flex items-center gap-1 transition-colors"
-              >
-                System Settings →
-              </button>
-            </div>
+  const systemStatus = [
+    { label: 'Server', value: 'Online', status: 'online', icon: ServerIcon },
+    { label: 'Database', value: 'Connected', status: 'online', icon: ActivityIcon },
+    { label: 'API', value: '45ms', status: 'online', icon: ZapIcon },
+    { label: 'Sessions', value: stats.activeSessions || '24', status: 'normal', icon: UsersIcon },
+  ];
+
+  return (
+    <div className="max-w-6xl mx-auto space-y-6 pb-8">
+      {/* Header */}
+      <div className="flex items-center justify-between flex-wrap gap-4 animate-fade-up">
+        <div className="dashboard-header" style={{ marginBottom: 0 }}>
+          <h1>Admin Dashboard</h1>
+          <p>Welcome back, {user?.name}</p>
+        </div>
+        <div className="flex items-center gap-6">
+          <div className="text-right">
+            <p className="text-2xl font-bold text-gray-900">{stats.totalUsers || 0}</p>
+            <p className="text-xs text-gray-500 font-medium">Total Users</p>
+          </div>
+          <div className="text-right">
+            <p className="text-2xl font-bold text-gray-900">{stats.totalStaff || 0}</p>
+            <p className="text-xs text-gray-500 font-medium">Total Staff</p>
           </div>
         </div>
       </div>
 
       {/* Metrics Overview */}
-      <MetricsOverview metrics={stats} />
+      <div className="animate-fade-up delay-1">
+        <MetricsOverview metrics={stats} />
+      </div>
 
       {/* Quick Actions */}
-      <div>
-        <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-          <span className="text-2xl">⚡</span> Quick Actions
-        </h2>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-          {quickActions.map((action) => (
+      <div className="animate-fade-up delay-2">
+        <div className="section-header">
+          <h2 className="section-title">Quick Actions</h2>
+        </div>
+        <div className="grid grid-cols-3 md:grid-cols-5 gap-3">
+          {quickActions.map((action, index) => (
             <button
               key={action.label}
               onClick={() => navigate(action.path)}
-              className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${action.gradient} 
-                         p-5 text-white shadow-lg hover:shadow-xl
-                         transform transition-all duration-300 hover:scale-105 hover:-translate-y-1 group`}
+              className="quick-action relative"
+              style={{ animationDelay: `${0.2 + index * 0.05}s` }}
             >
               {action.count > 0 && (
-                <span className="absolute top-2 right-2 w-6 h-6 bg-white text-gray-800 rounded-full 
-                               flex items-center justify-center text-xs font-bold animate-pulse">
+                <span className="absolute top-2 right-2 w-5 h-5 bg-gradient-to-br from-red-500 to-red-600 
+                                  text-white rounded-full flex items-center justify-center text-xs font-bold
+                                  shadow-lg shadow-red-500/30 animate-pulse">
                   {action.count}
                 </span>
               )}
-              <div className="absolute inset-0 bg-white/0 group-hover:bg-white/10 transition-colors duration-300" />
-              <div className="relative z-10 text-center">
-                <span className="text-3xl mb-2 block group-hover:scale-110 transition-transform duration-300">
-                  {action.icon}
-                </span>
-                <span className="font-semibold text-sm">{action.label}</span>
+              <div className={`quick-action-icon icon-box ${action.color}`}>
+                <action.icon size={20} />
               </div>
+              <span className="quick-action-label">{action.label}</span>
             </button>
           ))}
         </div>
       </div>
 
       {/* Pending Staff Approvals */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-lg overflow-hidden">
-        <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-100">
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-bold text-gray-800 flex items-center gap-3">
-              <span className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 
-                             flex items-center justify-center text-white text-lg">
-                👥
-              </span>
+      <div className="glass-card-solid overflow-hidden animate-fade-up delay-3">
+        <div className="px-5 py-4 border-b border-gray-100/80 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <h3 className="section-title">
+              <UsersIcon size={20} className="text-purple-500" />
               Pending Staff Approvals
-              {pendingStaff.length > 0 && (
-                <span className="px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-sm font-bold">
-                  {pendingStaff.length} pending
-                </span>
-              )}
             </h3>
-            <Link to="/admin/staff-approvals">
-              <button className="px-4 py-2 bg-primary-100 text-primary-600 rounded-xl font-semibold text-sm
-                                hover:bg-primary-200 transition-colors flex items-center gap-1">
-                View All →
-              </button>
-            </Link>
+            {pendingStaff.length > 0 && (
+              <span className="status-badge pending">
+                {pendingStaff.length} pending
+              </span>
+            )}
           </div>
+          <Link to="/admin/staff-approvals" className="section-link">
+            View all <ArrowRightIcon size={16} />
+          </Link>
         </div>
-        <div className="p-6">
+        <div className="p-5">
           {pendingStaff.length === 0 ? (
-            <div className="text-center py-12">
-              <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-green-100 
-                             flex items-center justify-center text-4xl">
-                ✅
-              </div>
-              <p className="text-gray-500 font-medium">No pending approvals</p>
-              <p className="text-gray-400 text-sm mt-1">All staff applications have been processed</p>
+            <div className="empty-state">
+              <CheckIcon size={48} className="empty-state-icon text-emerald-300" />
+              <p className="empty-state-text">No pending approvals</p>
             </div>
           ) : (
-            <StaffApprovalTable 
-              staff={pendingStaff.slice(0, 5)} 
+            <StaffApprovalTable
+              staff={pendingStaff.slice(0, 5)}
               onApprove={handleApproveStaff}
               onReject={handleRejectStaff}
               loading={actionLoading}
@@ -220,41 +191,31 @@ const AdminDashboardPage = () => {
       </div>
 
       {/* Blood Inventory Overview */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-lg overflow-hidden">
-        <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-100">
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-bold text-gray-800 flex items-center gap-3">
-              <span className="w-10 h-10 rounded-xl bg-gradient-to-br from-red-500 to-rose-600 
-                             flex items-center justify-center text-white text-lg">
-                🩸
-              </span>
-              Blood Inventory Overview
-            </h3>
-            <Link to="/admin/analytics">
-              <button className="px-4 py-2 bg-red-100 text-red-600 rounded-xl font-semibold text-sm
-                                hover:bg-red-200 transition-colors flex items-center gap-1">
-                View Analytics →
-              </button>
-            </Link>
-          </div>
+      <div className="glass-card-solid overflow-hidden animate-fade-up delay-4">
+        <div className="px-5 py-4 border-b border-gray-100/80 flex items-center justify-between">
+          <h3 className="section-title">
+            <DropletIcon size={20} className="text-red-500" />
+            Blood Inventory
+          </h3>
+          <Link to="/admin/analytics" className="section-link">
+            Analytics <ArrowRightIcon size={16} />
+          </Link>
         </div>
-        <div className="p-6">
-          <div className="grid grid-cols-4 md:grid-cols-8 gap-4">
+        <div className="p-5">
+          <div className="grid grid-cols-4 md:grid-cols-8 gap-3">
             {bloodGroups.map((bg, index) => (
-              <div 
+              <div
                 key={bg}
-                className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-red-50 to-rose-50 
-                          p-4 text-center border border-red-100 hover:shadow-lg 
-                          transform transition-all duration-300 hover:scale-105 group"
+                className="stat-card text-center p-3 animate-scale-in"
+                style={{ animationDelay: `${0.4 + index * 0.05}s` }}
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-red-500 to-rose-600 opacity-0 
-                               group-hover:opacity-10 transition-opacity duration-300" />
-                <div className="w-12 h-12 mx-auto mb-2 rounded-xl bg-gradient-to-br from-red-500 to-rose-600 
-                               flex items-center justify-center text-white font-bold text-sm shadow-lg">
+                <div className="blood-badge mx-auto mb-2" style={{ width: '40px', height: '40px', fontSize: '0.75rem' }}>
                   {bg}
                 </div>
-                <p className="text-2xl font-bold text-gray-800">{stats[`blood_${bg.replace('+', 'pos').replace('-', 'neg')}`] || 0}</p>
-                <p className="text-xs text-gray-500 mt-1">units</p>
+                <p className="text-lg font-bold text-gray-900">
+                  {stats[`blood_${bg.replace('+', 'pos').replace('-', 'neg')}`] || 0}
+                </p>
+                <p className="text-xs text-gray-400">units</p>
               </div>
             ))}
           </div>
@@ -262,25 +223,30 @@ const AdminDashboardPage = () => {
       </div>
 
       {/* System Status */}
-      <div className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-2xl p-6 border border-emerald-100">
-        <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-          <span className="text-xl">🖥️</span> System Status
-        </h3>
-        <div className="grid md:grid-cols-4 gap-4">
-          {[
-            { label: 'Server Status', value: 'Online', icon: '🟢', status: 'good' },
-            { label: 'Database', value: 'Connected', icon: '💾', status: 'good' },
-            { label: 'API Response', value: '45ms', icon: '⚡', status: 'good' },
-            { label: 'Active Sessions', value: stats.activeSessions || '24', icon: '👥', status: 'normal' },
-          ].map((item, index) => (
-            <div key={index} className="bg-white/80 rounded-xl p-4 flex items-center gap-4">
-              <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-xl
-                             ${item.status === 'good' ? 'bg-gradient-to-br from-emerald-500 to-teal-600' : 'bg-gradient-to-br from-blue-500 to-indigo-600'}`}>
-                {item.icon}
+      <div className="glass-card p-5 animate-fade-up delay-5">
+        <div className="section-header mb-4">
+          <h3 className="section-title">
+            <ServerIcon size={20} className="text-indigo-500" />
+            System Status
+          </h3>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {systemStatus.map((item, index) => (
+            <div
+              key={item.label}
+              className="bg-white/60 rounded-xl p-4 border border-gray-100/50
+                          hover:shadow-md transition-all duration-300"
+              style={{ animationDelay: `${0.5 + index * 0.1}s` }}
+            >
+              <div className="flex items-center gap-2 mb-2">
+                <span className={`status-dot ${item.status}`} />
+                <p className="text-sm text-gray-500 font-medium">{item.label}</p>
               </div>
-              <div>
-                <p className="text-lg font-bold text-gray-800">{item.value}</p>
-                <p className="text-gray-600 text-sm">{item.label}</p>
+              <div className="flex items-center justify-between">
+                <p className="text-lg font-bold text-gray-900">{item.value}</p>
+                <div className="icon-box admin-theme" style={{ width: '32px', height: '32px' }}>
+                  <item.icon size={16} />
+                </div>
               </div>
             </div>
           ))}

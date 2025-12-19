@@ -2,6 +2,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { useNotification } from '../common/NotificationSystem';
+import logoImage from '../../assets/logo/abstract-wings-cross-healthcare-removebg-preview.png';
 
 const Navbar = ({ onMenuClick, isSidebarOpen }) => {
   const { isAuthenticated, user, logout } = useAuth();
@@ -49,7 +50,7 @@ const Navbar = ({ onMenuClick, isSidebarOpen }) => {
   };
 
   return (
-    <nav className="sticky top-0 z-50 h-16 bg-white/80 backdrop-blur-xl border-b border-gray-100 shadow-sm">
+    <nav className="sticky top-0 z-50 h-16 bg-white/60 backdrop-blur-xl border-b border-gray-100 shadow-sm rounded-full">
       <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8 h-full">
         <div className="flex justify-between items-center h-full">
           {/* Left Section */}
@@ -74,11 +75,11 @@ const Navbar = ({ onMenuClick, isSidebarOpen }) => {
             
             <Link to="/" className="flex items-center gap-3 group">
               <div className="relative">
-                <div className="h-11 w-11 bg-gradient-to-br from-primary-500 via-rose-500 to-pink-500 
+                <div className="h-11 w-11 bg-gradient-to-br from-orange-500 via-white-500 to-green-500 
                                rounded-xl flex items-center justify-center shadow-lg shadow-primary-500/30
                                group-hover:shadow-xl group-hover:shadow-primary-500/40 
                                transform transition-all duration-300 group-hover:scale-105 group-hover:-rotate-3">
-                  <span className="text-white font-bold text-xl">L</span>
+                  <img src={logoImage} alt="LifeForce Logo" className="h-9 w-9 object-contain" />
                 </div>
                 <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white
                                animate-pulse" />

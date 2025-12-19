@@ -38,3 +38,7 @@ Thumbs.db
 # Misc
 *.pem
 .cache/
+
+/CHAT_FIX_PROGRESS.md
+
+Reference chat example/

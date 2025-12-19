@@ -18,7 +18,32 @@ export const handleChatSocket = (io, socket) => {
     console.log(`User ${socket.userId} left conversation ${conversationId}`);
   });
 
-  // Send a message
+  // Broadcast a message (used when message is saved via REST API)
+  socket.on('chat:newMessage', (data) => {
+    const { conversationId, message } = data;
+    if (!conversationId || !message) return;
+    
+    // Broadcast to all OTHER users in the conversation (not the sender)
+    socket.to(`conversation:${conversationId}`).emit('chat:newMessage', {
+      conversationId,
+      message
+    });
+    
+    // Also send notification to recipient if they're not in the conversation room
+    const recipientId = message.receiverId?._id || message.receiverId;
+    if (recipientId) {
+      socket.to(`user:${recipientId}`).emit('chat:notification', {
+        conversationId,
+        message: message.message || message.content,
+        senderName: message.senderId?.name || 'Someone',
+        senderId: message.senderId?._id || message.senderId
+      });
+    }
+    
+    console.log(`Message broadcast in conversation ${conversationId}`);
+  });
+
+  // Send a message via socket (alternative to REST - saves to DB)
   socket.on('chat:message', async (data) => {
     try {
       const { conversationId, receiverId, content } = data;
@@ -35,7 +60,8 @@ export const handleChatSocket = (io, socket) => {
         senderId: socket.userId,
         receiverId,
         message: content,
-        isRead: false
+        isRead: false,
+        isDeleted: false
       });
 
       await message.populate('senderId', 'name email role avatar');
@@ -48,14 +74,17 @@ export const handleChatSocket = (io, socket) => {
         }
       });
 
+      // Emit to ALL users in the conversation (including sender for confirmation)
       io.to(`conversation:${conversationId}`).emit('chat:newMessage', {
         conversationId,
         message: {
           _id: message._id,
           message: message.message,
           senderId: message.senderId,
+          receiverId: message.receiverId,
           createdAt: message.createdAt,
-          isRead: message.isRead
+          isRead: message.isRead,
+          isDeleted: message.isDeleted
         }
       });
       
@@ -75,7 +104,7 @@ export const handleChatSocket = (io, socket) => {
     }
   });
 
-  // Delete a message
+  // Delete a message (soft delete - marks as deleted instead of removing)
   socket.on('chat:deleteMessage', async (data) => {
     try {
       const { messageId, conversationId } = data;
@@ -97,14 +126,22 @@ export const handleChatSocket = (io, socket) => {
         return;
       }
 
-      await ChatMessage.findByIdAndDelete(messageId);
-
-      io.to(`conversation:${conversationId}`).emit('chat:messageDeleted', {
-        conversationId,
-        messageId
+      // Soft delete - mark as deleted instead of removing
+      await ChatMessage.findByIdAndUpdate(messageId, {
+        isDeleted: true,
+        deletedAt: new Date(),
+        deletedBy: socket.userId
       });
 
-      console.log(`Message ${messageId} deleted by ${socket.userId}`);
+      // Emit to all users in the conversation that message was deleted
+      io.to(`conversation:${conversationId}`).emit('chat:messageDeleted', {
+        conversationId,
+        messageId,
+        isDeleted: true,
+        deletedAt: new Date()
+      });
+
+      console.log(`Message ${messageId} soft-deleted by ${socket.userId}`);
     } catch (error) {
       console.error('Error deleting message:', error);
       socket.emit('chat:error', { message: 'Failed to delete message' });

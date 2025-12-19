@@ -1,16 +1,18 @@
-const Input = ({ 
-  label, 
-  type = 'text', 
-  name, 
-  value, 
-  onChange, 
-  placeholder, 
+import React, { forwardRef } from 'react';
+
+const Input = forwardRef(({
+  label,
+  type = 'text',
+  name,
+  value,
+  onChange,
+  placeholder,
   error,
   required = false,
   disabled = false,
   className = '',
-  ...props 
-}) => {
+  ...props
+}, ref) => {
   return (
     <div className="w-full">
       {label && (
@@ -19,6 +21,7 @@ const Input = ({
         </label>
       )}
       <input
+        ref={ref}
         type={type}
         id={name}
         name={name}
@@ -27,14 +30,16 @@ const Input = ({
         placeholder={placeholder}
         disabled={disabled}
         required={required}
-        className={`
+        className={
+          `
           w-full px-4 py-3 rounded-lg border
           ${error ? 'border-red-300 focus:border-red-500 focus:ring-red-100' : 'border-neutral-200 focus:border-red-500 focus:ring-red-100'}
           bg-white focus:outline-none focus:ring-2 
           transition-all duration-200 placeholder:text-neutral-400
           disabled:bg-neutral-100 disabled:cursor-not-allowed
           ${className}
-        `}
+        `
+        }
         {...props}
       />
       {error && (
@@ -42,6 +47,8 @@ const Input = ({
       )}
     </div>
   );
-};
+});
+
+Input.displayName = 'Input';
 
 export default Input;

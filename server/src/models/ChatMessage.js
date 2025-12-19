@@ -34,6 +34,16 @@ const chatMessageSchema = new mongoose.Schema(
       default: false,
     },
     readAt: Date,
+    // Soft delete fields
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
+    deletedAt: Date,
+    deletedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+    },
   },
   {
     timestamps: true,

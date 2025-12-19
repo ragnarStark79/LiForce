@@ -85,9 +85,20 @@ const StaffChatPage = () => {
       
       if (data.conversationId === roomId) {
         setMessages(prev => {
-          const exists = prev.some(m => m._id === data.message._id);
-          if (exists) return prev;
-          return [...prev, data.message];
+          // Remove any temp messages with same content from same sender
+          const filteredMessages = prev.filter(m => {
+            if (!m._id?.toString().startsWith('temp-')) return true;
+            const msgSenderId = m.senderId?._id || m.senderId;
+            const newMsgSenderId = data.message.senderId?._id || data.message.senderId;
+            if (m.message === data.message.message && msgSenderId === newMsgSenderId) {
+              return false;
+            }
+            return true;
+          });
+          
+          const exists = filteredMessages.some(m => m._id === data.message._id);
+          if (exists) return filteredMessages;
+          return [...filteredMessages, { ...data.message, isDeleted: data.message.isDeleted || false }];
         });
       }
       fetchConversations();
@@ -98,7 +109,12 @@ const StaffChatPage = () => {
       const roomId = currentConversation?._id || currentConversation?.roomId;
       
       if (data.conversationId === roomId) {
-        setMessages(prev => prev.filter(msg => msg._id !== data.messageId));
+        // Mark message as deleted instead of removing it
+        setMessages(prev => prev.map(msg => 
+          msg._id === data.messageId 
+            ? { ...msg, isDeleted: true, deletedAt: data.deletedAt }
+            : msg
+        ));
       }
     };
     
@@ -142,24 +158,41 @@ const StaffChatPage = () => {
     if (!newMessage.trim() || !selectedConversation) return;
 
     const roomId = selectedConversation._id || selectedConversation.roomId;
+    const recipientId = selectedConversation.otherParticipant?._id;
     const messageText = newMessage.trim();
+
+    // Clear input immediately for better UX
+    setNewMessage('');
 
     try {
       setSending(true);
-      setNewMessage('');
 
+      // Step 1: Save message via REST API (ensures persistence)
       const response = await staffService.sendMessage(roomId, messageText);
 
       if (response.chatMessage) {
-        setMessages(prev => [...prev, response.chatMessage]);
-      } else {
-        fetchMessages(roomId);
+        // Step 2: Add the saved message to local state
+        setMessages(prev => {
+          const exists = prev.some(m => m._id === response.chatMessage._id);
+          if (exists) return prev;
+          return [...prev, { ...response.chatMessage, isDeleted: false }];
+        });
+
+        // Step 3: Emit socket event for real-time delivery to recipient
+        if (connected && socket) {
+          socket.emit('chat:newMessage', {
+            conversationId: roomId,
+            message: response.chatMessage
+          });
+        }
       }
 
+      // Refresh conversations to update last message in sidebar
       fetchConversations();
     } catch (error) {
       console.error('Send message error:', error);
       toast.error('Failed to send message');
+      // Restore the message input on failure
       setNewMessage(messageText);
     } finally {
       setSending(false);
@@ -169,7 +202,14 @@ const StaffChatPage = () => {
   const handleDeleteMessage = async (messageId) => {
     if (!window.confirm('Delete this message?')) return;
     const roomId = selectedConversation?._id || selectedConversation?.roomId;
-    setMessages(prev => prev.filter(msg => msg._id !== messageId));
+    
+    // Optimistically mark as deleted
+    setMessages(prev => prev.map(msg => 
+      msg._id === messageId 
+        ? { ...msg, isDeleted: true, deletedAt: new Date().toISOString() }
+        : msg
+    ));
+    
     if (connected && socket) {
       socket.emit('chat:deleteMessage', { messageId, conversationId: roomId });
     }
@@ -200,6 +240,20 @@ const StaffChatPage = () => {
       toast.error('Failed to start conversation');
     }
   };
+
+  // Render deleted message placeholder
+  const renderDeletedMessage = (isOwnMessage) => (
+    <div className={`flex items-center gap-1 px-4 py-2 rounded-lg ${
+      isOwnMessage 
+        ? 'bg-primary-200 text-primary-400 border border-primary-300' 
+        : 'bg-neutral-100 text-neutral-400 border border-neutral-200'
+    }`}>
+      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+      </svg>
+      <span className="text-sm italic">This message was deleted</span>
+    </div>
+  );
 
   if (loading) {
     return (
@@ -301,26 +355,31 @@ const StaffChatPage = () => {
                     const senderId = msg.senderId?._id || msg.senderId;
                     const isOwnMessage = senderId === user?._id;
                     const messageText = msg.message || msg.text || msg.content || '';
+                    const isDeleted = msg.isDeleted;
 
                     return (
                       <div key={msg._id} className={isOwnMessage ? 'flex justify-end' : 'flex justify-start'}>
-                        <div className={isOwnMessage 
-                          ? 'group relative max-w-xs md:max-w-md px-4 py-2 rounded-lg bg-primary-500 text-white'
-                          : 'group relative max-w-xs md:max-w-md px-4 py-2 rounded-lg bg-neutral-100 text-neutral-800'}>
-                          <p>{messageText}</p>
-                          <p className={isOwnMessage ? 'text-xs mt-1 text-primary-100' : 'text-xs mt-1 text-neutral-400'}>
-                            {formatDate(msg.createdAt)}
-                          </p>
-                          {isOwnMessage && (
-                            <button
-                              onClick={() => handleDeleteMessage(msg._id)}
-                              className="absolute -top-2 -right-2 hidden group-hover:flex w-6 h-6 bg-red-500 text-white rounded-full items-center justify-center text-xs hover:bg-red-600"
-                              title="Delete message"
-                            >
-                              ×
-                            </button>
-                          )}
-                        </div>
+                        {isDeleted ? (
+                          renderDeletedMessage(isOwnMessage)
+                        ) : (
+                          <div className={isOwnMessage 
+                            ? 'group relative max-w-xs md:max-w-md px-4 py-2 rounded-lg bg-primary-500 text-white'
+                            : 'group relative max-w-xs md:max-w-md px-4 py-2 rounded-lg bg-neutral-100 text-neutral-800'}>
+                            <p>{messageText}</p>
+                            <p className={isOwnMessage ? 'text-xs mt-1 text-primary-100' : 'text-xs mt-1 text-neutral-400'}>
+                              {formatDate(msg.createdAt)}
+                            </p>
+                            {isOwnMessage && (
+                              <button
+                                onClick={() => handleDeleteMessage(msg._id)}
+                                className="absolute -top-2 -right-2 hidden group-hover:flex w-6 h-6 bg-red-500 text-white rounded-full items-center justify-center text-xs hover:bg-red-600"
+                                title="Delete message"
+                              >
+                                ×
+                              </button>
+                            )}
+                          </div>
+                        )}
                       </div>
                     );
                   })

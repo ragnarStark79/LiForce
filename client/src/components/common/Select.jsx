@@ -1,15 +1,15 @@
-const Select = ({ 
-  label, 
-  name, 
-  value, 
-  onChange, 
+const Select = ({
+  label,
+  name,
+  value,
+  onChange,
   options = [],
   error,
   required = false,
   disabled = false,
   placeholder = 'Select an option',
   className = '',
-  ...props 
+  ...props
 }) => {
   return (
     <div className="w-full">

@@ -16,7 +16,7 @@ const ChatWindow = ({ conversationId, recipientId, recipientName }) => {
   const [typingUser, setTypingUser] = useState(null);
   const messagesEndRef = useRef(null);
   const typingTimeoutRef = useRef(null);
-  const { socket, connected, joinConversation, leaveConversation, on, off } = useSocket();
+  const { socket, connected, joinConversation, leaveConversation } = useSocket();
   const { user } = useAuth();
 
   // Join conversation room when component mounts or conversationId changes
@@ -44,22 +44,34 @@ const ChatWindow = ({ conversationId, recipientId, recipientName }) => {
       if (data.conversationId === conversationId) {
         const newMsg = {
           _id: data.message._id,
-          content: data.message.message,
           message: data.message.message,
           senderId: data.message.senderId,
           createdAt: data.message.createdAt,
-          isRead: data.message.isRead
+          isRead: data.message.isRead,
+          isDeleted: data.message.isDeleted || false
         };
         
         setMessages(prev => {
+          // Remove any temporary/pending messages with the same content from the same sender
+          const filteredMessages = prev.filter(m => {
+            if (!m._id?.toString().startsWith('temp-')) return true;
+            const msgSenderId = m.senderId?._id || m.senderId;
+            const newMsgSenderId = newMsg.senderId?._id || newMsg.senderId;
+            if (m.message === newMsg.message && msgSenderId === newMsgSenderId) {
+              return false;
+            }
+            return true;
+          });
+          
           // Avoid duplicate messages
-          const exists = prev.some(m => m._id === newMsg._id);
-          if (exists) return prev;
-          return [...prev, newMsg];
+          const exists = filteredMessages.some(m => m._id === newMsg._id);
+          if (exists) return filteredMessages;
+          return [...filteredMessages, newMsg];
         });
         
         // Mark as read if we're the recipient
-        if (data.message.senderId?._id !== user?._id) {
+        const senderIdStr = data.message.senderId?._id || data.message.senderId;
+        if (senderIdStr !== user?._id) {
           markMessagesAsRead();
         }
       }
@@ -67,7 +79,12 @@ const ChatWindow = ({ conversationId, recipientId, recipientName }) => {
 
     const handleMessageDeleted = (data) => {
       if (data.conversationId === conversationId) {
-        setMessages(prev => prev.filter(m => m._id !== data.messageId));
+        // Mark message as deleted instead of removing it
+        setMessages(prev => prev.map(m => 
+          m._id === data.messageId 
+            ? { ...m, isDeleted: true, deletedAt: data.deletedAt }
+            : m
+        ));
       }
     };
 
@@ -88,7 +105,8 @@ const ChatWindow = ({ conversationId, recipientId, recipientName }) => {
     const handleMessagesRead = (data) => {
       if (data.conversationId === conversationId) {
         setMessages(prev => prev.map(msg => {
-          if (msg.senderId?._id === user?._id || msg.senderId === user?._id) {
+          const msgSenderId = msg.senderId?._id || msg.senderId;
+          if (msgSenderId === user?._id) {
             return { ...msg, isRead: true, readAt: data.readAt };
           }
           return msg;
@@ -129,9 +147,9 @@ const ChatWindow = ({ conversationId, recipientId, recipientName }) => {
 
   const markMessagesAsRead = useCallback(() => {
     if (socket && connected && conversationId) {
-      socket.emit('chat:markRead', { conversationId, recipientId });
+      socket.emit('chat:markRead', { conversationId });
     }
-  }, [socket, connected, conversationId, recipientId]);
+  }, [socket, connected, conversationId]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -140,11 +158,7 @@ const ChatWindow = ({ conversationId, recipientId, recipientName }) => {
   // Handle typing indicator
   const handleTyping = useCallback(() => {
     if (socket && connected && conversationId) {
-      socket.emit('chat:typing', { 
-        conversationId, 
-        recipientId,
-        userName: user?.name 
-      });
+      socket.emit('chat:typing', { conversationId });
       
       // Clear existing timeout
       if (typingTimeoutRef.current) {
@@ -153,15 +167,23 @@ const ChatWindow = ({ conversationId, recipientId, recipientName }) => {
       
       // Stop typing after 2 seconds of no input
       typingTimeoutRef.current = setTimeout(() => {
-        socket.emit('chat:stopTyping', { conversationId, recipientId });
+        socket.emit('chat:stopTyping', { conversationId });
       }, 2000);
     }
-  }, [socket, connected, conversationId, recipientId, user?.name]);
+  }, [socket, connected, conversationId]);
 
   const handleInputChange = (e) => {
     setNewMessage(e.target.value);
     handleTyping();
   };
+
+  const handleDeleteMessage = useCallback((messageId) => {
+    if (!window.confirm('Delete this message?')) return;
+    
+    if (socket && connected) {
+      socket.emit('chat:deleteMessage', { messageId, conversationId });
+    }
+  }, [socket, connected, conversationId]);
 
   const handleSend = async (e) => {
     e.preventDefault();
@@ -172,11 +194,24 @@ const ChatWindow = ({ conversationId, recipientId, recipientName }) => {
       clearTimeout(typingTimeoutRef.current);
     }
     if (socket && connected) {
-      socket.emit('chat:stopTyping', { conversationId, recipientId });
+      socket.emit('chat:stopTyping', { conversationId });
     }
 
     const messageContent = newMessage.trim();
     setNewMessage('');
+
+    // Optimistically add the message to UI
+    const tempId = `temp-${Date.now()}`;
+    const optimisticMessage = {
+      _id: tempId,
+      message: messageContent,
+      senderId: { _id: user?._id, name: user?.name },
+      createdAt: new Date().toISOString(),
+      isRead: false,
+      isDeleted: false,
+      pending: true
+    };
+    setMessages(prev => [...prev, optimisticMessage]);
 
     try {
       setSending(true);
@@ -188,10 +223,26 @@ const ChatWindow = ({ conversationId, recipientId, recipientName }) => {
           receiverId: recipientId,
           content: messageContent
         });
+      } else {
+        // Fallback to REST API if socket is not connected
+        const response = await chatService.sendMessage({
+          roomId: conversationId,
+          receiverId: recipientId,
+          message: messageContent
+        });
+        
+        // Replace optimistic message with real one
+        setMessages(prev => prev.map(msg => 
+          msg._id === tempId 
+            ? { ...response.chatMessage, pending: false }
+            : msg
+        ));
       }
     } catch (error) {
       console.error('Failed to send message:', error);
-      // Restore the message if sending failed
+      // Remove optimistic message on failure
+      setMessages(prev => prev.filter(msg => msg._id !== tempId));
+      // Restore the message input
       setNewMessage(messageContent);
     } finally {
       setSending(false);
@@ -240,7 +291,8 @@ const ChatWindow = ({ conversationId, recipientId, recipientName }) => {
             <ChatMessage 
               key={message._id || index} 
               message={message} 
-              showReadReceipt={message.senderId?._id === user?._id || message.senderId === user?._id}
+              showReadReceipt={true}
+              onDelete={handleDeleteMessage}
             />
           ))
         )}

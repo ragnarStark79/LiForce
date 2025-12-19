@@ -1,45 +1,41 @@
-import Card from '../common/Card';
-import Badge from '../common/Badge';
+import { DropletIcon } from '../common/DashboardIcons';
 
 const InventoryStatusCard = ({ inventory }) => {
-  const getStockStatus = (units, threshold) => {
-    if (units <= threshold) return { label: 'Critical', color: 'danger' };
-    if (units <= threshold * 2) return { label: 'Low', color: 'warning' };
-    return { label: 'Good', color: 'success' };
-  };
-
   const bloodGroups = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
 
   const getInventoryData = (bloodGroup) => {
     const item = inventory?.find(i => i.bloodGroup === bloodGroup);
-    return item || { unitsAvailable: 0, lowStockThreshold: 10 };
+    return item || { unitsAvailable: 0 };
   };
 
   return (
-    <Card>
-      <h3 className="text-lg font-semibold text-neutral-800 mb-4">Blood Inventory Status</h3>
-      
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {bloodGroups.map((bloodGroup) => {
-          const data = getInventoryData(bloodGroup);
-          const status = getStockStatus(data.unitsAvailable, data.lowStockThreshold);
-          
-          return (
-            <div
-              key={bloodGroup}
-              className="p-4 rounded-lg border border-neutral-100 text-center hover:shadow-md transition-shadow"
-            >
-              <div className="text-2xl font-bold text-red-600 mb-2">{bloodGroup}</div>
-              <div className="text-3xl font-bold text-neutral-800 mb-2">
-                {data.unitsAvailable}
-              </div>
-              <p className="text-xs text-neutral-500 mb-2">units available</p>
-              <Badge variant={status.color}>{status.label}</Badge>
+    <div className="grid grid-cols-4 md:grid-cols-8 gap-2 md:gap-3">
+      {bloodGroups.map((bloodGroup, index) => {
+        const data = getInventoryData(bloodGroup);
+        const units = data.unitsAvailable;
+        const isCritical = units === 0;
+        const isLow = units > 0 && units < 5;
+
+        return (
+          <div
+            key={bloodGroup}
+            className={`aspect-square rounded-xl p-1 flex flex-col items-center justify-center animate-scale-in border transition-all hover:scale-105
+                      ${isCritical ? 'bg-red-50 border-red-100 text-red-600' :
+                isLow ? 'bg-yellow-50 border-yellow-100 text-yellow-700' :
+                  'bg-slate-50 border-slate-100 text-slate-700'}`}
+            style={{ animationDelay: `${index * 0.05}s` }}
+          >
+            <div className={`text-lg md:text-2xl font-bold leading-none mb-1`}>
+              {units}
             </div>
-          );
-        })}
-      </div>
-    </Card>
+            <div className={`text-[10px] md:text-xs font-bold uppercase px-1.5 rounded-md
+                          ${isCritical ? 'bg-red-100' : 'bg-white shadow-sm'}`}>
+              {bloodGroup}
+            </div>
+          </div>
+        );
+      })}
+    </div>
   );
 };
 

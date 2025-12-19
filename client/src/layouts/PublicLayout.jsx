@@ -1,10 +1,14 @@
 import { Outlet } from 'react-router-dom';
-import Navbar from '../components/navigation/Navbar';
+import GlassNavbar from '../components/navigation/GlassNavbar';
 
+/**
+ * PublicLayout - Layout for public pages
+ * Uses Apple Music style GlassNavbar
+ */
 const PublicLayout = () => {
   return (
     <div className="min-h-screen bg-neutral-50">
-      <Navbar />
+      <GlassNavbar />
       <main>
         <Outlet />
       </main>
@@ -13,3 +17,4 @@ const PublicLayout = () => {
 };
 
 export default PublicLayout;
+

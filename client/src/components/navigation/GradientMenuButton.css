@@ -1,0 +1,344 @@
+/* ======================================================
+   GRADIENT MENU ICON BUTTON
+   Premium Interactive Navbar Button Component
+   ====================================================== */
+
+/* === CSS Custom Properties (Defaults) === */
+.gradient-menu-btn {
+    --btn-size: 60px;
+    --btn-expanded-width: 180px;
+    --btn-transition: 500ms cubic-bezier(0.34, 1.56, 0.64, 1);
+    --btn-transition-fast: 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
+    --icon-size: 24px;
+    --gradient-from: #6366f1;
+    --gradient-to: #a855f7;
+    --glow-opacity: 0.5;
+    --glow-blur: 20px;
+}
+
+/* === Base Button Styles === */
+.gradient-menu-btn {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--btn-size);
+    height: var(--btn-size);
+    padding: 0;
+    border: none;
+    border-radius: 9999px;
+    /* Fully rounded */
+    background: white;
+    box-shadow:
+        0 4px 12px rgba(0, 0, 0, 0.08),
+        0 2px 4px rgba(0, 0, 0, 0.05);
+    cursor: pointer;
+    overflow: visible;
+    transition:
+        width var(--btn-transition),
+        background var(--btn-transition-fast),
+        box-shadow var(--btn-transition-fast);
+    z-index: 1;
+}
+
+/* === Content Container === */
+.gradient-menu-btn__content {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    z-index: 2;
+}
+
+/* === Icon Styles === */
+.gradient-menu-btn__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--icon-size);
+    color: #6B7280;
+    /* Neutral gray */
+    transform: scale(1);
+    opacity: 1;
+    transition:
+        transform var(--btn-transition-fast),
+        opacity var(--btn-transition-fast);
+}
+
+.gradient-menu-btn__icon svg {
+    width: var(--icon-size);
+    height: var(--icon-size);
+    color: inherit;
+    fill: currentColor;
+    transition: inherit;
+}
+
+/* === Label Styles === */
+.gradient-menu-btn__label {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    white-space: nowrap;
+    transform: scale(0);
+    opacity: 0;
+    transition:
+        transform var(--btn-transition),
+        opacity var(--btn-transition-fast);
+    transition-delay: 0ms;
+}
+
+/* === Glow Effect Layer === */
+.gradient-menu-btn__glow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: 100%;
+    border-radius: 9999px;
+    background: linear-gradient(135deg,
+            var(--gradient-from) 0%,
+            var(--gradient-to) 100%);
+    filter: blur(var(--glow-blur));
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.8);
+    transition:
+        opacity var(--btn-transition-fast),
+        transform var(--btn-transition);
+    z-index: -1;
+    pointer-events: none;
+}
+
+/* ======================================================
+   HOVER STATES
+   ====================================================== */
+
+/* === Expand Width on Hover === */
+.gradient-menu-btn:hover {
+    width: var(--btn-expanded-width);
+    background: linear-gradient(135deg,
+            var(--gradient-from) 0%,
+            var(--gradient-to) 100%);
+    box-shadow: none;
+    /* Flat modern feel */
+}
+
+/* === Show Glow on Hover === */
+.gradient-menu-btn:hover .gradient-menu-btn__glow {
+    opacity: var(--glow-opacity);
+    transform: translate(-50%, -50%) scale(1.2);
+}
+
+/* === Hide Icon on Hover === */
+.gradient-menu-btn:hover .gradient-menu-btn__icon {
+    transform: scale(0);
+    opacity: 0;
+}
+
+/* === Reveal Label on Hover === */
+.gradient-menu-btn:hover .gradient-menu-btn__label {
+    transform: scale(1);
+    opacity: 1;
+    transition-delay: 100ms;
+    /* Delayed appearance after icon disappears */
+}
+
+/* ======================================================
+   ACTIVE STATE
+   ====================================================== */
+
+.gradient-menu-btn.active {
+    background: linear-gradient(135deg,
+            var(--gradient-from) 0%,
+            var(--gradient-to) 100%);
+    box-shadow: none;
+}
+
+.gradient-menu-btn.active .gradient-menu-btn__icon {
+    color: white;
+}
+
+/* Active + Hover state */
+.gradient-menu-btn.active:hover .gradient-menu-btn__icon {
+    transform: scale(0);
+    opacity: 0;
+}
+
+/* ======================================================
+   FOCUS STATES (Accessibility)
+   ====================================================== */
+
+.gradient-menu-btn:focus {
+    outline: 2px solid var(--gradient-to);
+    outline-offset: 4px;
+}
+
+.gradient-menu-btn:focus:not(:focus-visible) {
+    outline: none;
+}
+
+.gradient-menu-btn:focus-visible {
+    outline: 2px solid var(--gradient-to);
+    outline-offset: 4px;
+}
+
+/* ======================================================
+   BUTTON GROUP / NAVBAR CONTAINER
+   ====================================================== */
+
+.gradient-menu-group {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 12px 20px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: 9999px;
+    box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+/* Floating Dock Style Variant */
+.gradient-menu-group.floating {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+}
+
+/* Dark background variant */
+.gradient-menu-group.dark {
+    background: rgba(17, 24, 39, 0.85);
+    box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.25),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* ======================================================
+   RESPONSIVE ADJUSTMENTS
+   ====================================================== */
+
+@media (max-width: 768px) {
+    .gradient-menu-btn {
+        --btn-size: 50px;
+        --btn-expanded-width: 140px;
+        --icon-size: 20px;
+    }
+
+    .gradient-menu-btn__label {
+        font-size: 0.65rem;
+        letter-spacing: 0.08em;
+    }
+
+    .gradient-menu-group {
+        gap: 10px;
+        padding: 10px 16px;
+    }
+}
+
+/* Mobile: Tap instead of hover */
+@media (max-width: 480px) {
+    .gradient-menu-btn {
+        --btn-size: 48px;
+        --btn-expanded-width: 48px;
+        /* No expansion on mobile */
+    }
+
+    /* Keep icon visible on mobile */
+    .gradient-menu-btn:hover .gradient-menu-btn__icon,
+    .gradient-menu-btn:active .gradient-menu-btn__icon {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    /* Keep label hidden on mobile */
+    .gradient-menu-btn:hover .gradient-menu-btn__label,
+    .gradient-menu-btn:active .gradient-menu-btn__label {
+        transform: scale(0);
+        opacity: 0;
+    }
+
+    /* Keep button size on tap */
+    .gradient-menu-btn:hover,
+    .gradient-menu-btn:active {
+        width: var(--btn-size);
+    }
+
+    /* Show gradient on active/tap */
+    .gradient-menu-btn:active {
+        background: linear-gradient(135deg,
+                var(--gradient-from) 0%,
+                var(--gradient-to) 100%);
+    }
+
+    .gradient-menu-btn:active .gradient-menu-btn__icon {
+        color: white;
+    }
+
+    .gradient-menu-group.floating {
+        bottom: 16px;
+        padding: 8px 12px;
+    }
+}
+
+/* ======================================================
+   PRESET GRADIENT THEMES
+   ====================================================== */
+
+/* Purple Violet */
+.gradient-menu-btn.theme-purple {
+    --gradient-from: #7c3aed;
+    --gradient-to: #a78bfa;
+}
+
+/* Ocean Blue */
+.gradient-menu-btn.theme-ocean {
+    --gradient-from: #0ea5e9;
+    --gradient-to: #38bdf8;
+}
+
+/* Sunset Orange */
+.gradient-menu-btn.theme-sunset {
+    --gradient-from: #f97316;
+    --gradient-to: #fb923c;
+}
+
+/* Rose Pink */
+.gradient-menu-btn.theme-rose {
+    --gradient-from: #e11d48;
+    --gradient-to: #fb7185;
+}
+
+/* Emerald Green */
+.gradient-menu-btn.theme-emerald {
+    --gradient-from: #10b981;
+    --gradient-to: #34d399;
+}
+
+/* Cyber Neon */
+.gradient-menu-btn.theme-cyber {
+    --gradient-from: #06b6d4;
+    --gradient-to: #22d3ee;
+}
+
+/* Gold Premium */
+.gradient-menu-btn.theme-gold {
+    --gradient-from: #f59e0b;
+    --gradient-to: #fbbf24;
+}
+
+/* Blood Red (matching app theme) */
+.gradient-menu-btn.theme-blood {
+    --gradient-from: #dc2626;
+    --gradient-to: #ef4444;
+}

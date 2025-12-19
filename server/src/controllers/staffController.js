@@ -44,6 +44,12 @@ export const getDashboard = async (req, res) => {
       status: { $in: ['ASSIGNED', 'IN_PROGRESS'] }
     });
 
+    // Get total completed requests (all time, not just today)
+    const completedTotal = await BloodRequest.countDocuments({
+      hospitalId,
+      status: 'COMPLETED'
+    });
+
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     
@@ -78,7 +84,8 @@ export const getDashboard = async (req, res) => {
       stats: {
         pendingRequests,
         assignedToMe,
-        completedToday,
+        completedTotal,        // All-time completed
+        completedToday,        // Today's completed
         criticalCases,
         totalPatients,
         todayDonations,

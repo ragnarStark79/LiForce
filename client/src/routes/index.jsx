@@ -47,6 +47,9 @@ import AdminUsersPage from '../pages/admin/AdminUsersPage';
 import AdminSettingsPage from '../pages/admin/AdminSettingsPage';
 import AdminAnalyticsPage from '../pages/admin/AdminAnalyticsPage';
 
+// Demo Pages
+import GradientMenuDemo from '../pages/demo/GradientMenuDemo';
+
 const router = createBrowserRouter([
   // Public Routes
   {
@@ -58,6 +61,12 @@ const router = createBrowserRouter([
         element: <LandingPage />,
       },
     ],
+  },
+
+  // Demo Routes (for component showcase)
+  {
+    path: '/demo/gradient-menu',
+    element: <GradientMenuDemo />,
   },
 
   // Auth Routes

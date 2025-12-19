@@ -1,15 +1,19 @@
 import { useState, useEffect } from 'react';
-import Card from '../../components/common/Card';
-import Button from '../../components/common/Button';
+import Modal from '../../components/common/Modal';
 import Input from '../../components/common/Input';
 import Select from '../../components/common/Select';
-import Modal from '../../components/common/Modal';
-import Badge from '../../components/common/Badge';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import { userService } from '../../services/userService';
 import { useNotification } from '../../components/common/NotificationSystem';
 import { BLOOD_GROUPS, URGENCY_LEVELS } from '../../utils/constants';
 import { formatDate } from '../../utils/formatters';
+import {
+  DropletIcon,
+  ClockIcon,
+  CheckIcon,
+  AlertIcon,
+  ArrowRightIcon
+} from '../../components/common/DashboardIcons';
 
 const UserBloodRequestsPage = () => {
   const { notify } = useNotification();
@@ -100,23 +104,23 @@ const UserBloodRequestsPage = () => {
   };
 
   const getStatusBadge = (status) => {
-    const variants = {
-      PENDING: 'warning',
-      ASSIGNED: 'info',
-      IN_PROGRESS: 'primary',
-      COMPLETED: 'success',
-      CANCELLED: 'error',
+    const styles = {
+      PENDING: { class: 'pending', icon: ClockIcon },
+      ASSIGNED: { class: 'in-progress', icon: CheckIcon },
+      IN_PROGRESS: { class: 'in-progress', icon: ClockIcon },
+      COMPLETED: { class: 'completed', icon: CheckIcon },
+      CANCELLED: { class: 'pending', icon: null },
     };
-    return <Badge variant={variants[status] || 'secondary'}>{status}</Badge>;
+    return styles[status] || styles.PENDING;
   };
 
   const getUrgencyBadge = (urgency) => {
-    const variants = {
-      NORMAL: 'secondary',
-      HIGH: 'warning',
-      CRITICAL: 'error',
+    const styles = {
+      NORMAL: 'pending',
+      HIGH: 'pending',
+      CRITICAL: 'critical',
     };
-    return <Badge variant={variants[urgency] || 'secondary'}>{urgency}</Badge>;
+    return styles[urgency] || 'pending';
   };
 
   if (loading) {
@@ -128,125 +132,170 @@ const UserBloodRequestsPage = () => {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-display font-bold text-neutral-800">My Blood Requests</h1>
-          <p className="text-neutral-600 mt-2">Track and manage your blood requests</p>
-        </div>
-        <Button variant="primary" onClick={() => setShowNewRequestModal(true)}>+ New Request</Button>
-      </div>
-
-      {requests.length === 0 ? (
-        <Card>
-          <div className="text-center py-12 text-neutral-500">
-            <div className="text-6xl mb-4">🩸</div>
-            <p className="text-lg mb-2">No blood requests yet</p>
-            <p className="text-sm mb-4">Create your first blood request to get started</p>
-            <Button variant="primary" onClick={() => setShowNewRequestModal(true)}>Create Request</Button>
+    <div className="dashboard-page user-theme">
+      <div className="max-w-4xl mx-auto space-y-6 relative z-10">
+        {/* Header */}
+        <div className="flex items-center justify-between animate-fade-up">
+          <div className="dashboard-header" style={{ marginBottom: 0 }}>
+            <h1>Blood Requests</h1>
+            <p>Manage your blood requests</p>
           </div>
-        </Card>
-      ) : (
-        <div className="grid gap-4">
-          {requests.map(request => (
-            <Card key={request._id} className="hover:shadow-md transition-shadow">
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2">
-                    <span className="text-2xl font-bold text-primary-600">{request.bloodGroup}</span>
-                    {getStatusBadge(request.status)}
-                    {getUrgencyBadge(request.urgency)}
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                    <div>
-                      <p className="text-neutral-500">Hospital</p>
-                      <p className="font-medium">{request.hospitalId?.name || 'N/A'}</p>
-                    </div>
-                    <div>
-                      <p className="text-neutral-500">Units Required</p>
-                      <p className="font-medium">{request.unitsRequired} units</p>
-                    </div>
-                    <div>
-                      <p className="text-neutral-500">Requested On</p>
-                      <p className="font-medium">{formatDate(request.createdAt)}</p>
-                    </div>
-                  </div>
-                  {request.patientName && (
-                    <p className="text-sm text-neutral-600 mt-2">
-                      <span className="font-medium">Patient:</span> {request.patientName}
-                    </p>
-                  )}
-                </div>
-                {request.status === 'PENDING' && (
-                  <Button variant="danger" size="sm" onClick={() => handleCancel(request._id)}>Cancel</Button>
-                )}
-              </div>
-            </Card>
-          ))}
+          <button
+            onClick={() => setShowNewRequestModal(true)}
+            className="btn-modern primary"
+          >
+            <DropletIcon size={18} />
+            New Request
+          </button>
         </div>
-      )}
 
-      <Modal isOpen={showNewRequestModal} onClose={() => setShowNewRequestModal(false)} title="Create Blood Request" size="lg">
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <Select
-            label="Hospital"
-            name="hospitalId"
-            value={formData.hospitalId}
-            onChange={handleChange}
-            options={hospitals.map(h => ({ value: h._id, label: `${h.name} (${h.city || h.code})` }))}
-            placeholder="Select a hospital"
-            required
-          />
-          <div className="grid grid-cols-2 gap-4">
+        {/* Requests List */}
+        {requests.length === 0 ? (
+          <div className="glass-card-solid p-12 text-center animate-fade-up delay-1">
+            <div className="icon-box danger mx-auto mb-4" style={{ width: '64px', height: '64px' }}>
+              <DropletIcon size={32} />
+            </div>
+            <p className="text-gray-700 font-medium mb-2">No blood requests yet</p>
+            <p className="text-sm text-gray-400 mb-6">Create your first request to get started</p>
+            <button
+              onClick={() => setShowNewRequestModal(true)}
+              className="btn-modern primary"
+            >
+              Create Request
+            </button>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {requests.map((request, index) => {
+              const statusInfo = getStatusBadge(request.status);
+              const urgencyClass = getUrgencyBadge(request.urgency);
+
+              return (
+                <div
+                  key={request._id}
+                  className="glass-card-solid p-5 animate-fade-up"
+                  style={{ animationDelay: `${0.1 + index * 0.05}s` }}
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-start gap-4">
+                      <div className="blood-badge text-lg">
+                        {request.bloodGroup}
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2 mb-1 flex-wrap">
+                          <span className={`status-badge ${statusInfo.class}`}>
+                            {statusInfo.icon && <statusInfo.icon size={12} />}
+                            {request.status}
+                          </span>
+                          <span className={`status-badge ${urgencyClass}`}>
+                            {request.urgency === 'CRITICAL' && (
+                              <span className="status-dot error" style={{ width: '5px', height: '5px' }} />
+                            )}
+                            {request.urgency}
+                          </span>
+                        </div>
+                        <p className="text-sm text-gray-600 mt-1">
+                          {request.hospitalId?.name || 'N/A'} • {request.unitsRequired} units
+                        </p>
+                        <p className="text-xs text-gray-400 mt-1">
+                          {formatDate(request.createdAt)}
+                        </p>
+                        {request.patientName && (
+                          <p className="text-xs text-gray-500 mt-2">
+                            Patient: {request.patientName}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    {request.status === 'PENDING' && (
+                      <button
+                        onClick={() => handleCancel(request._id)}
+                        className="text-xs font-medium text-gray-400 hover:text-red-500 transition-colors
+                                  px-3 py-1.5 rounded-lg hover:bg-red-50"
+                      >
+                        Cancel
+                      </button>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Modal */}
+        <Modal isOpen={showNewRequestModal} onClose={() => setShowNewRequestModal(false)} title="New Blood Request" size="lg">
+          <form onSubmit={handleSubmit} className="space-y-4">
             <Select
-              label="Blood Group"
-              name="bloodGroup"
-              value={formData.bloodGroup}
+              label="Hospital"
+              name="hospitalId"
+              value={formData.hospitalId}
               onChange={handleChange}
-              options={BLOOD_GROUPS.map(bg => ({ value: bg, label: bg }))}
-              placeholder="Select blood group"
+              options={hospitals.map(h => ({ value: h._id, label: `${h.name} (${h.city || h.code})` }))}
+              placeholder="Select a hospital"
               required
+            />
+            <div className="grid grid-cols-2 gap-4">
+              <Select
+                label="Blood Group"
+                name="bloodGroup"
+                value={formData.bloodGroup}
+                onChange={handleChange}
+                options={BLOOD_GROUPS.map(bg => ({ value: bg, label: bg }))}
+                placeholder="Select blood group"
+                required
+              />
+              <Input
+                label="Units Required"
+                type="number"
+                name="unitsRequired"
+                value={formData.unitsRequired}
+                onChange={handleChange}
+                min="1"
+                max="10"
+                required
+              />
+            </div>
+            <Select
+              label="Urgency"
+              name="urgency"
+              value={formData.urgency}
+              onChange={handleChange}
+              options={URGENCY_LEVELS.map(u => ({ value: u, label: u }))}
             />
             <Input
-              label="Units Required"
-              type="number"
-              name="unitsRequired"
-              value={formData.unitsRequired}
+              label="Patient Name (Optional)"
+              name="patientName"
+              value={formData.patientName}
               onChange={handleChange}
-              min="1"
-              max="10"
-              required
+              placeholder="Enter patient name"
             />
-          </div>
-          <Select
-            label="Urgency"
-            name="urgency"
-            value={formData.urgency}
-            onChange={handleChange}
-            options={URGENCY_LEVELS.map(u => ({ value: u, label: u }))}
-          />
-          <Input
-            label="Patient Name (Optional)"
-            name="patientName"
-            value={formData.patientName}
-            onChange={handleChange}
-            placeholder="Enter patient name"
-          />
-          <Input
-            label="Medical Reason (Optional)"
-            name="medicalReason"
-            value={formData.medicalReason}
-            onChange={handleChange}
-            placeholder="e.g., Surgery, Accident, etc."
-          />
-          <div className="flex justify-end gap-3 pt-4">
-            <Button type="button" variant="secondary" onClick={() => setShowNewRequestModal(false)}>Cancel</Button>
-            <Button type="submit" variant="primary" disabled={formLoading}>
-              {formLoading ? 'Creating...' : 'Create Request'}
-            </Button>
-          </div>
-        </form>
-      </Modal>
+            <Input
+              label="Medical Reason (Optional)"
+              name="medicalReason"
+              value={formData.medicalReason}
+              onChange={handleChange}
+              placeholder="e.g., Surgery, Accident, etc."
+            />
+            <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
+              <button
+                type="button"
+                onClick={() => setShowNewRequestModal(false)}
+                className="btn-modern secondary"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={formLoading}
+                className="btn-modern primary"
+              >
+                {formLoading ? 'Creating...' : 'Create Request'}
+              </button>
+            </div>
+          </form>
+        </Modal>
+      </div>
     </div>
   );
 };

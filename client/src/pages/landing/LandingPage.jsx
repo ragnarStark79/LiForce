@@ -1,8 +1,10 @@
 import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import Button from '../../components/common/Button';
+import { useAuth } from '../../hooks/useAuth';
 
 const LandingPage = () => {
+  const { isAuthenticated } = useAuth();
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
@@ -89,33 +91,47 @@ const LandingPage = () => {
             </h1>
 
             <p className="text-xl md:text-2xl text-white/80 mb-10 max-w-3xl mx-auto leading-relaxed">
-              Join the revolution in blood donation. Connect with hospitals, save lives, 
+              Join the revolution in blood donation. Connect with hospitals, save lives,
               and be part of something bigger than yourself.
             </p>
 
             <div className="flex flex-wrap gap-4 justify-center mb-16">
-              <Link to="/register">
-                <button className="group px-8 py-4 bg-white text-primary-600 font-bold rounded-2xl shadow-2xl 
-                                   hover:shadow-white/25 transform transition-all duration-300 hover:scale-105 hover:-translate-y-1
-                                   flex items-center gap-3">
-                  <span>Become a Donor</span>
-                  <span className="group-hover:translate-x-1 transition-transform">→</span>
-                </button>
-              </Link>
-              <Link to="/register-staff">
-                <button className="px-8 py-4 bg-white/10 backdrop-blur-sm text-white font-bold rounded-2xl 
-                                   border-2 border-white/30 hover:bg-white/20 transform transition-all duration-300 
-                                   hover:scale-105 hover:-translate-y-1">
-                  Join as Staff
-                </button>
-              </Link>
-              <Link to="/login">
-                <button className="px-8 py-4 text-white font-semibold hover:text-white/80 transition-colors
-                                   flex items-center gap-2">
-                  <span>Already a member?</span>
-                  <span className="underline">Sign In</span>
-                </button>
-              </Link>
+              {!isAuthenticated && (
+                <>
+                  <Link to="/register">
+                    <button className="group px-8 py-4 bg-white text-primary-600 font-bold rounded-2xl shadow-2xl 
+                                       hover:shadow-white/25 transform transition-all duration-300 hover:scale-105 hover:-translate-y-1
+                                       flex items-center gap-3">
+                      <span>Become a Donor</span>
+                      <span className="group-hover:translate-x-1 transition-transform">→</span>
+                    </button>
+                  </Link>
+                  <Link to="/register-staff">
+                    <button className="px-8 py-4 bg-white/10 backdrop-blur-sm text-white font-bold rounded-2xl 
+                                       border-2 border-white/30 hover:bg-white/20 transform transition-all duration-300 
+                                       hover:scale-105 hover:-translate-y-1">
+                      Join as Staff
+                    </button>
+                  </Link>
+                  <Link to="/login">
+                    <button className="px-8 py-4 text-white font-semibold hover:text-white/80 transition-colors
+                                       flex items-center gap-2">
+                      <span>Already a member?</span>
+                      <span className="underline">Sign In</span>
+                    </button>
+                  </Link>
+                </>
+              )}
+              {isAuthenticated && (
+                <Link to="/user/dashboard">
+                  <button className="group px-8 py-4 bg-white text-primary-600 font-bold rounded-2xl shadow-2xl 
+                                     hover:shadow-white/25 transform transition-all duration-300 hover:scale-105 hover:-translate-y-1
+                                     flex items-center gap-3">
+                    <span>Go to Dashboard</span>
+                    <span className="group-hover:translate-x-1 transition-transform">→</span>
+                  </button>
+                </Link>
+              )}
             </div>
 
             {/* Stats */}
@@ -148,7 +164,7 @@ const LandingPage = () => {
       {/* Features Section */}
       <section className="py-24 bg-gradient-to-b from-gray-50 to-white relative overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-primary-600/5 to-transparent" />
-        
+
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <span className="inline-block px-4 py-2 bg-primary-100 text-primary-600 rounded-full text-sm font-semibold mb-4">
@@ -173,13 +189,13 @@ const LandingPage = () => {
                 {/* Gradient overlay on hover */}
                 <div className={`absolute inset-0 bg-gradient-to-br ${feature.gradient} opacity-0 
                                 group-hover:opacity-5 transition-opacity duration-500`} />
-                
+
                 <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${feature.gradient} 
                                 flex items-center justify-center text-3xl mb-6 shadow-lg
                                 group-hover:scale-110 transition-transform duration-300`}>
                   {feature.icon}
                 </div>
-                
+
                 <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-primary-600 transition-colors">
                   {feature.title}
                 </h3>
@@ -260,18 +276,29 @@ const LandingPage = () => {
             Join thousands of heroes who have already made a difference. Your donation could save up to 3 lives.
           </p>
           <div className="flex flex-wrap gap-4 justify-center">
-            <Link to="/register">
-              <button className="px-10 py-5 bg-white text-primary-600 font-bold text-lg rounded-2xl shadow-2xl
-                                hover:shadow-white/25 transform transition-all duration-300 hover:scale-105">
-                Get Started Now
-              </button>
-            </Link>
-            <Link to="/login">
-              <button className="px-10 py-5 bg-transparent text-white font-bold text-lg rounded-2xl 
-                                border-2 border-white/50 hover:bg-white/10 transition-all duration-300">
-                Sign In
-              </button>
-            </Link>
+            {!isAuthenticated ? (
+              <>
+                <Link to="/register">
+                  <button className="px-10 py-5 bg-white text-primary-600 font-bold text-lg rounded-2xl shadow-2xl
+                                    hover:shadow-white/25 transform transition-all duration-300 hover:scale-105">
+                    Get Started Now
+                  </button>
+                </Link>
+                <Link to="/login">
+                  <button className="px-10 py-5 bg-transparent text-white font-bold text-lg rounded-2xl 
+                                    border-2 border-white/50 hover:bg-white/10 transition-all duration-300">
+                    Sign In
+                  </button>
+                </Link>
+              </>
+            ) : (
+              <Link to="/user/dashboard">
+                <button className="px-10 py-5 bg-white text-primary-600 font-bold text-lg rounded-2xl shadow-2xl
+                                    hover:shadow-white/25 transform transition-all duration-300 hover:scale-105">
+                  Go to Dashboard
+                </button>
+              </Link>
+            )}
           </div>
         </div>
       </section>

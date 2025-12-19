@@ -1,0 +1,507 @@
+/* ======================================================
+   GLASS NAVBAR - Dynamic Island Style Navigation
+   ====================================================== */
+
+/* === CSS Custom Properties === */
+:root {
+    --navbar-top-height: 64px;
+    --glass-blur: 20px;
+    --glass-bg: rgba(255, 255, 255, 0.7);
+    /* Lighter for light mode */
+    --glass-border: rgba(0, 0, 0, 0.05);
+    --dock-bg: rgba(255, 255, 255, 0.85);
+    /* Light frosted glass docking */
+    --dock-border: rgba(0, 0, 0, 0.08);
+    /* Subtle border for light mode */
+    --transition-spring: 600ms cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    /* Bouncy spring */
+    --transition-smooth: 400ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* ======================================================
+   TOP HEADER - Logo (Left) + Profile (Right)
+   ====================================================== */
+
+.glass-navbar-top {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: var(--navbar-top-height);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    z-index: 1000;
+    pointer-events: none;
+}
+
+/* === Logo === */
+.glass-navbar__logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05), 0 0 0 1px var(--glass-border);
+    overflow: hidden;
+    text-decoration: none;
+    transition: transform var(--transition-smooth);
+    pointer-events: auto;
+}
+
+.glass-navbar__logo:hover {
+    transform: scale(1.05);
+}
+
+.glass-navbar__logo img {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+}
+
+/* === Profile === */
+.glass-navbar__profile {
+    position: relative;
+    pointer-events: auto;
+}
+
+.glass-navbar__profile-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    border-radius: 24px;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    transition: all var(--transition-smooth);
+}
+
+.glass-navbar__profile-btn:hover {
+    transform: scale(1.02);
+    background: white;
+}
+
+.glass-navbar__chevron {
+    width: 16px;
+    height: 16px;
+    color: #9ca3af;
+    margin-right: 4px;
+    transition: transform var(--transition-smooth);
+}
+
+.glass-navbar__chevron--open {
+    transform: rotate(180deg);
+}
+
+/* === Profile Dropdown === */
+.glass-navbar__dropdown-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10;
+}
+
+.glass-navbar__dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    width: 260px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 16px;
+    box-shadow:
+        0 20px 60px rgba(0, 0, 0, 0.15),
+        0 0 0 1px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+    z-index: 20;
+    animation: dropdown-appear 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes dropdown-appear {
+    from {
+        opacity: 0;
+        transform: translateY(-8px) scale(0.96);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.glass-navbar__dropdown-header {
+    padding: 16px;
+    background: linear-gradient(135deg, #dc2626 0%, #f87171 100%);
+}
+
+.glass-navbar__dropdown-user {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.glass-navbar__dropdown-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+.glass-navbar__dropdown-name {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: white;
+}
+
+.glass-navbar__dropdown-email {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.8);
+    margin-top: 2px;
+}
+
+.glass-navbar__dropdown-menu {
+    padding: 8px;
+}
+
+.glass-navbar__dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 12px 14px;
+    background: transparent;
+    border: none;
+    border-radius: 10px;
+    color: #374151;
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    text-align: left;
+}
+
+.glass-navbar__dropdown-item:hover {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.glass-navbar__dropdown-item-icon {
+    font-size: 1rem;
+}
+
+.glass-navbar__dropdown-divider {
+    height: 1px;
+    background: rgba(0, 0, 0, 0.08);
+    margin: 4px 12px;
+}
+
+.glass-navbar__dropdown-item--danger {
+    color: #dc2626;
+}
+
+.glass-navbar__dropdown-item--danger:hover {
+    background: rgba(220, 38, 38, 0.08);
+}
+
+/* === Auth Buttons (Not Logged In) === */
+.glass-navbar__auth {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    pointer-events: auto;
+}
+
+.glass-navbar__auth-btn {
+    padding: 10px 18px;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-smooth);
+    text-decoration: none;
+}
+
+.glass-navbar__auth-btn--secondary {
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(var(--glass-blur));
+    border: none;
+    color: #374151;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.glass-navbar__auth-btn--secondary:hover {
+    color: #dc2626;
+    transform: scale(1.02);
+}
+
+.glass-navbar__auth-btn--primary {
+    background: linear-gradient(135deg, #dc2626 0%, #f87171 100%);
+    border: none;
+    color: white;
+    box-shadow: 0 4px 16px rgba(220, 38, 38, 0.3);
+}
+
+.glass-navbar__auth-btn--primary:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 8px 24px rgba(220, 38, 38, 0.4);
+}
+
+/* ======================================================
+   DYNAMIC DOCK - The "Interactive Island"
+   ====================================================== */
+
+.glass-navbar__dock {
+    position: fixed;
+    bottom: 24px;
+    /* Floating from bottom */
+    z-index: 1000;
+    background: var(--dock-bg);
+    backdrop-filter: blur(25px) saturate(180%);
+    -webkit-backdrop-filter: blur(25px) saturate(180%);
+    border: 1px solid var(--dock-border);
+    box-shadow:
+        0 10px 40px -10px rgba(0, 0, 0, 0.15),
+        0 0 0 1px rgba(255, 255, 255, 0.4) inset;
+    border-radius: 9999px;
+    transition:
+        all var(--transition-spring),
+        opacity 0.3s ease;
+    pointer-events: auto;
+    overflow: hidden;
+}
+
+/* EXPANDED STATE (Center Bottom) */
+.glass-navbar__dock--expanded {
+    left: 50%;
+    transform: translateX(-50%);
+    width: auto;
+    min-width: 320px;
+    padding: 12px 16px;
+    height: auto;
+}
+
+/* COLLAPSED STATE (Left Bottom Circle) */
+.glass-navbar__dock--collapsed {
+    left: 24px;
+    /* Bottom left position */
+    bottom: 24px;
+    transform: translateX(0);
+    /* Reset centering transform */
+    width: 56px;
+    height: 56px;
+    padding: 0;
+    border-radius: 50%;
+    /* Perfect circle */
+    background: rgba(255, 255, 255, 0.9);
+    /* Slightly brighter when collapsed */
+    cursor: pointer;
+}
+
+.glass-navbar__dock--collapsed:hover {
+    transform: scale(1.1);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+}
+
+/* Dock Items Container */
+.glass-navbar__dock-items {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    animation: fadeIn 0.3s ease-out forwards;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Collapsed Icon (Hamburger/Menu) */
+.glass-navbar__dock-collapsed-icon {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: scaleIn 0.3s var(--transition-spring) forwards;
+}
+
+@keyframes scaleIn {
+    from {
+        transform: scale(0);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.glass-navbar__menu-trigger {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    width: 20px;
+}
+
+.glass-navbar__menu-trigger-bar {
+    width: 100%;
+    height: 2px;
+    background-color: #374151;
+    /* Dark gray for light mode */
+    border-radius: 2px;
+    transition: all 0.3s ease;
+}
+
+.glass-navbar__dock--collapsed:hover .glass-navbar__menu-trigger-bar:nth-child(1) {
+    transform: translateY(-2px);
+}
+
+.glass-navbar__dock--collapsed:hover .glass-navbar__menu-trigger-bar:nth-child(3) {
+    transform: translateY(2px);
+}
+
+
+/* ======================================================
+   RESPONSIVE
+   ====================================================== */
+
+@media (max-width: 768px) {
+    .glass-navbar__dock--expanded {
+        width: 90%;
+        max-width: 400px;
+        min-width: auto;
+        padding: 10px 14px;
+        bottom: 16px;
+    }
+
+    .glass-navbar__dock--collapsed {
+        left: 16px;
+        bottom: 16px;
+        width: 48px;
+        height: 48px;
+    }
+}
+
+/* Override GradientMenuButton for Dock */
+.glass-navbar__dock .gradient-menu-btn {
+    --btn-size: 50px;
+    --btn-expanded-width: 130px;
+    --icon-size: 24px;
+    /* Increased icon size */
+    background: rgba(0, 0, 0, 0.05);
+    /* Slightly darker for better visibility */
+    box-shadow: none;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    /* Subtle border */
+}
+
+.glass-navbar__dock .gradient-menu-btn:hover {
+    background: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transform: translateY(-2px);
+    /* Explicit lift */
+}
+
+/* Base icon color - Darker gray for visibility */
+.glass-navbar__dock .gradient-menu-btn .gradient-menu-btn__icon {
+    color: #374151;
+    transition: color 0.2s ease;
+}
+
+/* ACTIVE STATE - Focus & Visibility */
+.glass-navbar__dock .gradient-menu-btn.active {
+    background: white;
+    /* Active item gets white bg */
+    box-shadow:
+        0 4px 12px rgba(0, 0, 0, 0.1),
+        inset 0 0 0 2px rgba(99, 102, 241, 0.5);
+    /* Subtle ring for focus */
+}
+
+.glass-navbar__dock .gradient-menu-btn.active .gradient-menu-btn__icon {
+    color: #6366f1;
+    /* Active icon gets primary color (Indigo) */
+    transform: scale(1.1);
+    /* Slightly larger */
+}
+
+/* Mobile Adjustments */
+@media (max-width: 768px) {
+    .glass-navbar__dock--expanded {
+        width: 90%;
+        max-width: 400px;
+        min-width: auto;
+        padding: 8px 12px;
+        bottom: 16px;
+        background: rgba(255, 255, 255, 0.98);
+        /* More opaque on mobile */
+    }
+
+    .glass-navbar__dock--collapsed {
+        left: 16px;
+        bottom: 16px;
+        width: 48px;
+        height: 48px;
+    }
+
+    .glass-navbar__dock .gradient-menu-btn {
+        --btn-size: 44px;
+        /* Smaller buttons on mobile */
+        --icon-size: 20px;
+    }
+
+    /* Ensure active state is very visible on mobile - Override any hover/focus oddities */
+    .glass-navbar__dock .gradient-menu-btn.active {
+        background: white !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+        opacity: 1 !important;
+    }
+
+    /* Force icon color in active state */
+    .glass-navbar__dock .gradient-menu-btn.active .gradient-menu-btn__icon {
+        color: #6366f1 !important;
+        /* Indigo */
+        opacity: 1 !important;
+        transform: scale(1.1);
+    }
+
+    /* Prevent icon from disappearing on tap/hover */
+    .glass-navbar__dock .gradient-menu-btn:hover .gradient-menu-btn__icon,
+    .glass-navbar__dock .gradient-menu-btn:active .gradient-menu-btn__icon,
+    .glass-navbar__dock .gradient-menu-btn:focus .gradient-menu-btn__icon {
+        opacity: 1 !important;
+        transform: scale(1) !important;
+    }
+
+    /* Override GradientMenuButton's default :active gradient which might clash */
+    .glass-navbar__dock .gradient-menu-btn:active {
+        background: white !important;
+        box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.05);
+    }
+}

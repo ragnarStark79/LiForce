@@ -1,4 +1,4 @@
-import { createContext, useEffect, useState, useCallback } from 'react';
+import { createContext, useEffect, useState, useCallback, useRef } from 'react';
 import { io } from 'socket.io-client';
 import toast from 'react-hot-toast';
 
@@ -9,31 +9,52 @@ export const SocketProvider = ({ children }) => {
   const [connected, setConnected] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const reconnectAttempts = useRef(0);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
     
     if (token) {
-      const socketInstance = io('http://localhost:5001', {
+      // Use environment variable or default to port 5001 (matching server config)
+      const socketUrl = import.meta.env.VITE_SOCKET_URL || 'http://localhost:5001';
+      
+      const socketInstance = io(socketUrl, {
         auth: { token },
         reconnection: true,
         reconnectionDelay: 1000,
-        reconnectionAttempts: 5,
+        reconnectionDelayMax: 5000,
+        reconnectionAttempts: 10,
         transports: ['websocket', 'polling'],
       });
 
       socketInstance.on('connect', () => {
-        console.log('Socket connected');
+        console.log('Socket connected:', socketInstance.id);
         setConnected(true);
+        reconnectAttempts.current = 0;
       });
 
-      socketInstance.on('disconnect', () => {
-        console.log('Socket disconnected');
+      socketInstance.on('disconnect', (reason) => {
+        console.log('Socket disconnected:', reason);
         setConnected(false);
       });
 
       socketInstance.on('connect_error', (error) => {
-        console.error('Socket connection error:', error);
+        console.error('Socket connection error:', error.message);
+        reconnectAttempts.current += 1;
+        if (reconnectAttempts.current >= 5) {
+          toast.error('Connection issues. Messages may be delayed.', {
+            id: 'socket-error',
+            duration: 5000
+          });
+        }
+      });
+
+      socketInstance.on('reconnect', (attemptNumber) => {
+        console.log('Socket reconnected after', attemptNumber, 'attempts');
+        toast.success('Connection restored!', {
+          id: 'socket-reconnect',
+          duration: 2000
+        });
       });
 
       // Handle incoming chat notifications
@@ -54,6 +75,12 @@ export const SocketProvider = ({ children }) => {
       // Handle message deleted
       socketInstance.on('chat:messageDeleted', (data) => {
         // This will be handled by individual chat components
+      });
+
+      // Handle errors from server
+      socketInstance.on('chat:error', (data) => {
+        console.error('Chat error:', data.message);
+        toast.error(data.message || 'Chat error occurred');
       });
 
       setSocket(socketInstance);

@@ -10,15 +10,13 @@ import './styles/index.css';
 import './styles/animations.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
-  <React.StrictMode>
-    <AuthProvider>
-      <ThemeProvider>
-        <SocketProvider>
-          <NotificationProvider>
-            <RouterProvider router={router} />
-          </NotificationProvider>
-        </SocketProvider>
-      </ThemeProvider>
-    </AuthProvider>
-  </React.StrictMode>,
+  <AuthProvider>
+    <ThemeProvider>
+      <SocketProvider>
+        <NotificationProvider>
+          <RouterProvider router={router} />
+        </NotificationProvider>
+      </SocketProvider>
+    </ThemeProvider>
+  </AuthProvider>,
 );
