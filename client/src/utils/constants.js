@@ -49,7 +49,10 @@ export const STAFF_POSITIONS = [
 ];
 
 // API endpoints
-export const API_BASE_URL = '/api';
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
+
+// Socket URL
+export const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:5001';
 
 // Socket events
 export const SOCKET_EVENTS = {

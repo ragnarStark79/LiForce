@@ -1,7 +1,10 @@
 import axios from 'axios';
 
+// Use environment variable or fallback to relative path
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
+
 const apiClient = axios.create({
-  baseURL: '/api',
+  baseURL: `${API_BASE_URL}/api`,
   headers: {
     'Content-Type': 'application/json',
   },
