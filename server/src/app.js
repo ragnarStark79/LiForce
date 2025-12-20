@@ -14,21 +14,32 @@ import chatRoutes from './routes/chatRoutes.js';
 
 const app = express();
 
-// Middleware - Allow multiple origins for CORS
+// Middleware - Allow multiple Vercel domains and localhost
 const allowedOrigins = [
-  config.clientUrl,
+  config.clientUrl, // Main configured URL
   'http://localhost:5173',
   'http://localhost:5174',
 ];
 
+// Also allow any Vercel preview/production URLs
+const allowVercelDomains = (origin) => {
+  if (!origin) return true; // Allow requests with no origin
+  if (allowedOrigins.includes(origin)) return true;
+  
+  // Allow all Vercel deployment URLs (li-force-client-*.vercel.app)
+  if (origin.includes('li-force-client') && origin.includes('vercel.app')) {
+    return true;
+  }
+  
+  return false;
+};
+
 console.log('CORS allowed origins:', allowedOrigins);
+console.log('CORS also allows: All li-force-client-*.vercel.app domains');
 
 app.use(cors({
   origin: (origin, callback) => {
-    // Allow requests with no origin (like Postman, mobile apps)
-    if (!origin) return callback(null, true);
-    
-    if (allowedOrigins.includes(origin)) {
+    if (allowVercelDomains(origin)) {
       callback(null, true);
     } else {
       console.log('❌ CORS blocked origin:', origin);

@@ -8,22 +8,34 @@ let io;
 
 // Initialize Socket.io
 export const initSocket = (server) => {
-  // Use the dedicated socket CORS origin from config
-  const socketOrigins = [
-    process.env.CLIENT_URL || 'http://localhost:5173',
-    process.env.SOCKET_CORS_ORIGIN || 'http://localhost:5173',
-    'http://localhost:5173',
-    'http://localhost:5174'
-  ];
+  // Allow all Vercel deployment URLs for Socket.io
+  const allowSocketOrigin = (origin) => {
+    // Allow localhost
+    if (origin?.includes('localhost')) return true;
+    
+    // Allow all Vercel li-force-client domains
+    if (origin?.includes('li-force-client') && origin?.includes('vercel.app')) {
+      return true;
+    }
+    
+    // Allow configured CLIENT_URL
+    if (origin === process.env.CLIENT_URL) return true;
+    
+    return false;
+  };
 
-  // Remove duplicates
-  const uniqueOrigins = [...new Set(socketOrigins)];
-
-  console.log('Socket.io CORS allowed origins:', uniqueOrigins);
+  console.log('Socket.io CORS: Allowing all li-force-client-*.vercel.app domains and localhost');
 
   io = new Server(server, {
     cors: {
-      origin: uniqueOrigins,
+      origin: (origin, callback) => {
+        if (allowSocketOrigin(origin)) {
+          callback(null, true);
+        } else {
+          console.log('❌ Socket CORS blocked:', origin);
+          callback(new Error('Not allowed by CORS'));
+        }
+      },
       methods: ['GET', 'POST'],
       credentials: true
     }
