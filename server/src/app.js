@@ -14,11 +14,30 @@ import chatRoutes from './routes/chatRoutes.js';
 
 const app = express();
 
-// Middleware
+// Middleware - Allow multiple origins for CORS
+const allowedOrigins = [
+  config.clientUrl,
+  'http://localhost:5173',
+  'http://localhost:5174',
+];
+
+console.log('CORS allowed origins:', allowedOrigins);
+
 app.use(cors({
-  origin: config.clientUrl,
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like Postman, mobile apps)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      console.log('❌ CORS blocked origin:', origin);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
 }));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

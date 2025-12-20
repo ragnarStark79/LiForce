@@ -8,9 +8,22 @@ let io;
 
 // Initialize Socket.io
 export const initSocket = (server) => {
+  // Use the dedicated socket CORS origin from config
+  const socketOrigins = [
+    process.env.CLIENT_URL || 'http://localhost:5173',
+    process.env.SOCKET_CORS_ORIGIN || 'http://localhost:5173',
+    'http://localhost:5173',
+    'http://localhost:5174'
+  ];
+
+  // Remove duplicates
+  const uniqueOrigins = [...new Set(socketOrigins)];
+
+  console.log('Socket.io CORS allowed origins:', uniqueOrigins);
+
   io = new Server(server, {
     cors: {
-      origin: process.env.CLIENT_URL || 'http://localhost:5173',
+      origin: uniqueOrigins,
       methods: ['GET', 'POST'],
       credentials: true
     }
