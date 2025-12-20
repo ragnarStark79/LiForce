@@ -50,6 +50,9 @@ import AdminAnalyticsPage from '../pages/admin/AdminAnalyticsPage';
 // Demo Pages
 import GradientMenuDemo from '../pages/demo/GradientMenuDemo';
 
+// Debug Pages
+import ConnectionTest from '../pages/debug/ConnectionTest';
+
 const router = createBrowserRouter([
   // Public Routes
   {
@@ -61,6 +64,12 @@ const router = createBrowserRouter([
         element: <LandingPage />,
       },
     ],
+  },
+
+  // Debug Routes (accessible without auth for testing)
+  {
+    path: '/debug',
+    element: <ConnectionTest />,
   },
 
   // Demo Routes (for component showcase)
