@@ -53,8 +53,8 @@ const RegisterUserPage = () => {
       toast.success('Registration successful! Welcome to LifeForce.');
       navigate('/user/dashboard');
     } catch (error) {
-      setErrors({ 
-        general: error.response?.data?.message || 'Registration failed. Please try again.' 
+      setErrors({
+        general: error.response?.data?.message || 'Registration failed. Please try again.'
       });
     } finally {
       setLoading(false);
@@ -62,117 +62,157 @@ const RegisterUserPage = () => {
   };
 
   return (
-    <div>
-      <h2 className="text-2xl font-display font-bold text-neutral-800 mb-6 text-center">
-        Register as Donor
-      </h2>
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="text-center">
+        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-slate-200 bg-white/60 shadow-sm">
+          <span className="w-2 h-2 rounded-full" style={{ background: 'linear-gradient(135deg, #22c55e, #3b82f6)' }} />
+          <span className="text-xs font-semibold text-slate-700">Create donor account</span>
+        </div>
+        <h2 className="mt-4 v2-title">Register as Donor</h2>
+        <p className="mt-2 v2-subtitle">A modern profile helps hospitals match donors faster.</p>
+      </div>
 
       {errors.general && (
-        <div className="mb-4 p-3 bg-danger-50 border border-danger-200 text-danger-700 rounded-soft text-sm">
+        <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
           {errors.general}
         </div>
       )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        <Input
-          label="Full Name"
-          name="name"
-          value={formData.name}
-          onChange={handleChange}
-          placeholder="John Doe"
-          required
-          error={errors.name}
-        />
+        {/* Section: identity */}
+        <div className="rounded-2xl border border-slate-200 bg-white/60 p-4">
+          <div className="text-sm font-semibold text-slate-900">Profile basics</div>
+          <div className="text-xs text-slate-600 mt-1">Used for verification and contact.</div>
 
-        <Input
-          label="Email"
-          type="email"
-          name="email"
-          value={formData.email}
-          onChange={handleChange}
-          placeholder="john@example.com"
-          required
-          error={errors.email}
-        />
+          <div className="mt-4 space-y-4">
+            <Input
+              label="Full Name"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              placeholder="John Doe"
+              required
+              error={errors.name}
+              className="v2-focus"
+            />
 
-        <Input
-          label="Phone Number"
-          type="tel"
-          name="phone"
-          value={formData.phone}
-          onChange={handleChange}
-          placeholder="+1 (555) 000-0000"
-          required
-          error={errors.phone}
-        />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Input
+                label="Email"
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                placeholder="john@example.com"
+                required
+                error={errors.email}
+                className="v2-focus"
+              />
 
-        <Select
-          label="Blood Group"
-          name="bloodGroup"
-          value={formData.bloodGroup}
-          onChange={handleChange}
-          options={bloodGroupOptions}
-          placeholder="Select your blood group"
-          required
-          error={errors.bloodGroup}
-        />
-
-        <div className="grid grid-cols-2 gap-4">
-          <Input
-            label="City"
-            name="city"
-            value={formData.city}
-            onChange={handleChange}
-            placeholder="New York"
-            required
-            error={errors.city}
-          />
-          <Input
-            label="State"
-            name="state"
-            value={formData.state}
-            onChange={handleChange}
-            placeholder="NY"
-            required
-            error={errors.state}
-          />
+              <Input
+                label="Phone Number"
+                type="tel"
+                name="phone"
+                value={formData.phone}
+                onChange={handleChange}
+                placeholder="+1 (555) 000-0000"
+                required
+                error={errors.phone}
+                className="v2-focus"
+              />
+            </div>
+          </div>
         </div>
 
-        <Input
-          label="Password"
-          type="password"
-          name="password"
-          value={formData.password}
-          onChange={handleChange}
-          placeholder="Minimum 8 characters"
-          required
-          error={errors.password}
-        />
+        {/* Section: donor details */}
+        <div className="rounded-2xl border border-slate-200 bg-white/60 p-4">
+          <div className="text-sm font-semibold text-slate-900">Donor details</div>
+          <div className="text-xs text-slate-600 mt-1">Helps with matching and scheduling.</div>
 
-        <Input
-          label="Confirm Password"
-          type="password"
-          name="confirmPassword"
-          value={formData.confirmPassword}
-          onChange={handleChange}
-          placeholder="Re-enter your password"
-          required
-          error={errors.confirmPassword}
-        />
+          <div className="mt-4 space-y-4">
+            <Select
+              label="Blood Group"
+              name="bloodGroup"
+              value={formData.bloodGroup}
+              onChange={handleChange}
+              options={bloodGroupOptions}
+              placeholder="Select your blood group"
+              required
+              error={errors.bloodGroup}
+            />
 
-        <Button 
-          type="submit" 
-          fullWidth 
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Input
+                label="City"
+                name="city"
+                value={formData.city}
+                onChange={handleChange}
+                placeholder="New York"
+                required
+                error={errors.city}
+                className="v2-focus"
+              />
+              <Input
+                label="State"
+                name="state"
+                value={formData.state}
+                onChange={handleChange}
+                placeholder="NY"
+                required
+                error={errors.state}
+                className="v2-focus"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Section: security */}
+        <div className="rounded-2xl border border-slate-200 bg-white/60 p-4">
+          <div className="text-sm font-semibold text-slate-900">Security</div>
+          <div className="text-xs text-slate-600 mt-1">Choose a strong password.</div>
+
+          <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Input
+              label="Password"
+              type="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              placeholder="Minimum 8 characters"
+              required
+              error={errors.password}
+              className="v2-focus"
+            />
+
+            <Input
+              label="Confirm Password"
+              type="password"
+              name="confirmPassword"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              placeholder="Re-enter your password"
+              required
+              error={errors.confirmPassword}
+              className="v2-focus"
+            />
+          </div>
+        </div>
+
+        <Button
+          type="submit"
+          fullWidth
           loading={loading}
           disabled={loading}
+          className="rounded-2xl py-3"
         >
-          Register
+          Create account
         </Button>
       </form>
 
-      <div className="mt-6 text-center text-sm text-neutral-600">
+      <div className="text-center text-sm text-slate-600">
         Already have an account?{' '}
-        <Link to="/login" className="text-primary-600 hover:text-primary-700 font-medium transition-smooth">
+        <Link to="/login" className="font-semibold text-red-600 hover:text-red-700">
           Sign In
         </Link>
       </div>

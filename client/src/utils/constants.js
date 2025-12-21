@@ -48,6 +48,11 @@ export const STAFF_POSITIONS = [
   'Coordinator',
 ];
 
+// Donation business rules
+// NOTE: Many regions use ~56 days / 8 weeks for whole blood donations.
+// Keep this centralized to avoid magic numbers across pages.
+export const DONATION_ELIGIBILITY_DAYS = 7;
+
 // API endpoints
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 

@@ -14,6 +14,7 @@ const LoginPage = () => {
   });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const [showDemo, setShowDemo] = useState(false);
 
   const { login } = useAuth();
   const { notify } = useNotification();
@@ -62,26 +63,64 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="fade-in">
-      <h2 className="text-2xl font-bold text-neutral-800 mb-6 text-center">
-        Welcome Back
-      </h2>
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="text-center">
+        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-slate-200 bg-white/60 shadow-sm">
+          <span className="w-2 h-2 rounded-full" style={{ background: 'linear-gradient(135deg, #ef4444, #f97316)' }} />
+          <span className="text-xs font-semibold text-slate-700">Secure sign-in</span>
+        </div>
+        <h2 className="mt-4 v2-title">Welcome back</h2>
+        <p className="mt-2 v2-subtitle">Sign in to your dashboard and continue your impact.</p>
+      </div>
 
+      {/* Error */}
       {errors.general && (
-        <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm shake">
-          {errors.general}
+        <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <div className="font-semibold">Unable to sign in</div>
+          <div className="mt-1 opacity-90">{errors.general}</div>
         </div>
       )}
 
-      <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm">
-        <p className="font-medium text-blue-800 mb-2">Demo Accounts:</p>
-        <div className="text-blue-700 space-y-1">
-          <p><strong>Admin:</strong> admin@liforce.com / Admin@123456</p>
-          <p><strong>Staff:</strong> staff@liforce.com / Staff@123456</p>
-          <p><strong>User:</strong> user@liforce.com / User@123456</p>
-        </div>
+      {/* Demo accounts: collapsed drawer */}
+      <div className="rounded-2xl border border-slate-200 bg-white/60 shadow-sm overflow-hidden">
+        <button
+          type="button"
+          onClick={() => setShowDemo(v => !v)}
+          className="w-full flex items-center justify-between px-4 py-3 text-left v2-tap"
+        >
+          <div>
+            <div className="text-sm font-semibold text-slate-900">Demo accounts</div>
+            <div className="text-xs text-slate-600">Tap to {showDemo ? 'hide' : 'reveal'} credentials</div>
+          </div>
+          <span className="text-slate-500" aria-hidden>
+            {showDemo ? '▴' : '▾'}
+          </span>
+        </button>
+        {showDemo && (
+          <div className="px-4 pb-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="rounded-2xl border border-slate-200 bg-white p-3">
+                <div className="text-xs font-semibold text-slate-900">Admin</div>
+                <div className="mt-2 text-xs text-slate-600">admin@liforce.com</div>
+                <div className="text-xs text-slate-600">Admin@123456</div>
+              </div>
+              <div className="rounded-2xl border border-slate-200 bg-white p-3">
+                <div className="text-xs font-semibold text-slate-900">Staff</div>
+                <div className="mt-2 text-xs text-slate-600">staff@liforce.com</div>
+                <div className="text-xs text-slate-600">Staff@123456</div>
+              </div>
+              <div className="rounded-2xl border border-slate-200 bg-white p-3">
+                <div className="text-xs font-semibold text-slate-900">User</div>
+                <div className="mt-2 text-xs text-slate-600">user@liforce.com</div>
+                <div className="text-xs text-slate-600">User@123456</div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
+      {/* Form */}
       <form onSubmit={handleSubmit} className="space-y-4">
         <Input
           label="Email"
@@ -89,9 +128,10 @@ const LoginPage = () => {
           name="email"
           value={formData.email}
           onChange={handleChange}
-          placeholder="Enter your email"
+          placeholder="name@domain.com"
           required
           error={errors.email}
+          className="v2-focus"
         />
 
         <Input
@@ -100,9 +140,10 @@ const LoginPage = () => {
           name="password"
           value={formData.password}
           onChange={handleChange}
-          placeholder="Enter your password"
+          placeholder="Your password"
           required
           error={errors.password}
+          className="v2-focus"
         />
 
         <div className="flex items-center justify-between">
@@ -112,33 +153,28 @@ const LoginPage = () => {
             checked={formData.rememberMe}
             onChange={handleChange}
           />
-          <Link 
-            to="/forgot-password" 
-            className="text-sm text-red-600 hover:text-red-700"
-          >
+          <Link to="/forgot-password" className="text-sm font-semibold text-slate-700 hover:text-slate-900">
             Forgot password?
           </Link>
         </div>
 
-        <Button 
-          type="submit" 
-          fullWidth 
+        <Button
+          type="submit"
+          fullWidth
           loading={loading}
           disabled={loading}
+          className="rounded-2xl py-3"
         >
-          Sign In
+          Sign in
         </Button>
       </form>
 
-      <div className="mt-6 text-center text-sm text-neutral-600">
-        Don't have an account?{' '}
-        <Link to="/register" className="text-red-600 hover:text-red-700 font-medium">
-          Register as Donor
-        </Link>
+      {/* Footer links */}
+      <div className="pt-2 text-center text-sm text-slate-600">
+        <span>New here?</span>{' '}
+        <Link to="/register" className="font-semibold text-red-600 hover:text-red-700">Register as Donor</Link>
         {' or '}
-        <Link to="/register-staff" className="text-red-600 hover:text-red-700 font-medium">
-          Join as Staff
-        </Link>
+        <Link to="/register-staff" className="font-semibold text-red-600 hover:text-red-700">Join as Staff</Link>
       </div>
     </div>
   );

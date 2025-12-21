@@ -74,14 +74,6 @@ const UserDashboardPage = () => {
 
   const eligibility = getEligibilityMessage();
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-96">
-        <LoadingSpinner size="lg" />
-      </div>
-    );
-  }
-
   const quickActions = [
     { label: 'Request Blood', icon: DropletIcon, path: '/user/blood-requests', color: 'danger' },
     { label: 'Schedule', icon: CalendarIcon, path: '/user/schedule-donation', color: 'user-theme' },
@@ -89,182 +81,320 @@ const UserDashboardPage = () => {
     { label: 'Messages', icon: ChatIcon, path: '/user/chat', color: 'info' },
   ];
 
-  return (
-    <div className="max-w-5xl mx-auto space-y-6 pb-8">
-      {/* Welcome Header */}
-      <div className="dashboard-header animate-fade-up">
-        <h1>Welcome back, {user?.name?.split(' ')[0]} 👋</h1>
-        <p>Here's your donation overview and activity</p>
-      </div>
+  const firstName = user?.name?.split(' ')?.[0] || 'there';
+  const hasBloodType = Boolean(user?.bloodGroup);
 
-      {/* Stats Row */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem' }}>
-        {/* Total Donations */}
-        <div className="stat-card user-accent animate-fade-up delay-1">
-          <div className="flex items-start justify-between">
-            <div>
-              <p className="text-3xl font-bold text-gray-900 mb-1">
-                {dashboardData.stats.totalDonations}
-              </p>
-              <p className="text-sm font-medium text-gray-500">Total Donations</p>
-            </div>
-            <div className="icon-box user-theme">
-              <HeartIcon size={22} />
-            </div>
-          </div>
-        </div>
-
-        {/* Total Requests */}
-        <div className="stat-card animate-fade-up delay-2" style={{ '--accent': 'var(--staff-gradient)' }}>
-          <div className="flex items-start justify-between">
-            <div>
-              <p className="text-3xl font-bold text-gray-900 mb-1">
-                {dashboardData.stats.totalRequests}
-              </p>
-              <p className="text-sm font-medium text-gray-500">Blood Requests</p>
-            </div>
-            <div className="icon-box info">
-              <DocumentIcon size={22} />
-            </div>
-          </div>
-        </div>
-
-        {/* Lives Impacted */}
-        <div className="stat-card success-accent animate-fade-up delay-3">
-          <div className="flex items-start justify-between">
-            <div>
-              <p className="text-3xl font-bold text-gray-900 mb-1">
-                {dashboardData.stats.livesImpacted}
-              </p>
-              <p className="text-sm font-medium text-gray-500">Lives Helped</p>
-            </div>
-            <div className="icon-box success">
-              <UsersIcon size={22} />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Eligibility Card */}
-      <div className="glass-card p-5 animate-fade-up delay-4">
-        <div className="flex items-center justify-between flex-wrap gap-4">
-          <div className="flex items-center gap-4">
-            <div className={`icon-box ${eligibility.canDonate ? 'success' : 'warning'}`}>
-              {eligibility.canDonate ? (
-                <CheckIcon size={24} />
-              ) : (
-                <ClockIcon size={24} />
-              )}
-            </div>
-            <div>
-              <h3 className="font-semibold text-gray-900 text-lg">Donation Status</h3>
-              <p className={`text-sm font-medium ${eligibility.canDonate ? 'text-emerald-600' : 'text-amber-600'}`}>
-                {eligibility.message}
-              </p>
-            </div>
-          </div>
-
-          <button
-            onClick={() => navigate('/user/schedule-donation')}
-            disabled={!eligibility.canDonate}
-            className={`btn-modern ${eligibility.canDonate ? 'primary' : 'secondary'}`}
-          >
-            <CalendarIcon size={18} />
-            Schedule Donation
-          </button>
-        </div>
-      </div>
-
-      {/* Quick Actions */}
-      <div className="animate-fade-up delay-5">
-        <div className="section-header">
-          <h2 className="section-title">Quick Actions</h2>
-        </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          {quickActions.map((action, index) => (
-            <button
-              key={action.label}
-              onClick={() => navigate(action.path)}
-              className="quick-action"
-              style={{ animationDelay: `${0.5 + index * 0.1}s` }}
-            >
-              <div className={`quick-action-icon icon-box ${action.color}`}>
-                <action.icon size={22} />
+  if (loading) {
+    // Premium skeleton: avoids abrupt spinner-only loading.
+    return (
+      <div className="v2-bg">
+        <div className="v2-container max-w-6xl mx-auto space-y-6 pb-10">
+          {/* Hero skeleton */}
+          <div className="v2-panel p-6 sm:p-8">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+              <div className="space-y-3">
+                <div className="h-5 w-32 v2-skeleton" />
+                <div className="h-10 w-72 v2-skeleton" />
+                <div className="h-4 w-96 max-w-full v2-skeleton v2-skeleton-muted" />
               </div>
-              <span className="quick-action-label">{action.label}</span>
-            </button>
-          ))}
+              <div className="grid grid-cols-2 gap-3 w-full lg:w-[420px]">
+                <div className="h-20 v2-skeleton" />
+                <div className="h-20 v2-skeleton" />
+                <div className="h-20 v2-skeleton" />
+                <div className="h-20 v2-skeleton" />
+              </div>
+            </div>
+          </div>
+
+          {/* Modules skeleton */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <div className="lg:col-span-8 space-y-6">
+              <div className="v2-panel p-6">
+                <div className="h-6 w-48 v2-skeleton" />
+                <div className="mt-4 space-y-3">
+                  <div className="h-14 v2-skeleton" />
+                  <div className="h-14 v2-skeleton" />
+                  <div className="h-14 v2-skeleton" />
+                </div>
+              </div>
+              <div className="v2-panel p-6">
+                <div className="h-6 w-44 v2-skeleton" />
+                <div className="mt-4 h-36 v2-skeleton" />
+              </div>
+            </div>
+            <div className="lg:col-span-4 space-y-6">
+              <div className="v2-panel p-6">
+                <div className="h-6 w-40 v2-skeleton" />
+                <div className="mt-4 grid grid-cols-2 gap-3">
+                  <div className="h-20 v2-skeleton" />
+                  <div className="h-20 v2-skeleton" />
+                  <div className="h-20 v2-skeleton" />
+                  <div className="h-20 v2-skeleton" />
+                </div>
+              </div>
+              <div className="v2-panel p-6">
+                <div className="h-6 w-36 v2-skeleton" />
+                <div className="mt-4 h-20 v2-skeleton" />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
+    );
+  }
 
-      {/* Active Requests */}
-      <div className="glass-card-solid overflow-hidden animate-fade-up delay-6">
-        <div className="px-5 py-4 border-b border-gray-100/80 flex items-center justify-between">
-          <h3 className="section-title">Active Requests</h3>
-          <button
-            onClick={() => navigate('/user/blood-requests')}
-            className="section-link"
-          >
-            View all <ArrowRightIcon size={16} />
-          </button>
-        </div>
+  return (
+    <div className="v2-bg">
+      <div className="v2-container max-w-6xl mx-auto space-y-6 pb-10">
+        {/* HERO: layered, premium */}
+        <section className="v2-panel p-6 sm:p-8 animate-fade-up">
+          <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
+            <div className="min-w-0">
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-slate-200 bg-white/60 shadow-sm">
+                <span className="w-2 h-2 rounded-full" style={{ background: 'linear-gradient(135deg, #ef4444, #f97316)' }} />
+                <span className="text-xs font-semibold text-slate-700">Donor Console</span>
+              </div>
 
-        <div className="divide-y divide-gray-100/50">
-          {dashboardData.activeRequests.length === 0 ? (
-            <div className="empty-state">
-              <DropletIcon size={48} className="empty-state-icon" />
-              <p className="empty-state-text">No active requests</p>
+              <h1 className="mt-4 v2-title">Welcome back, {firstName}</h1>
+              <p className="mt-2 v2-subtitle">
+                Track eligibility, follow your requests, and keep your donation momentum.
+              </p>
+
+              <div className="mt-5 flex flex-wrap items-center gap-3">
+                <button
+                  onClick={() => navigate('/user/schedule-donation')}
+                  disabled={!eligibility.canDonate}
+                  className={`btn-modern ${eligibility.canDonate ? 'primary' : 'secondary'} rounded-2xl`}
+                >
+                  <CalendarIcon size={18} />
+                  Schedule Donation
+                </button>
+
+                <button
+                  onClick={() => navigate('/user/blood-requests')}
+                  className="btn-modern secondary rounded-2xl"
+                >
+                  <DropletIcon size={18} />
+                  Request Blood
+                </button>
+
+                <button
+                  onClick={fetchDashboardData}
+                  className="btn-modern secondary rounded-2xl"
+                >
+                  Refresh
+                </button>
+              </div>
             </div>
-          ) : (
-            dashboardData.activeRequests.slice(0, 3).map((request) => (
-              <div key={request._id} className="list-item mx-4 my-2">
-                <div className="flex items-center gap-3">
-                  <div className="blood-badge">
-                    {request.bloodGroup}
+
+            {/* KPI cluster */}
+            <div className="w-full lg:w-[440px] grid grid-cols-2 gap-3">
+              <div className="v2-card v2-kpi p-4 animate-fade-up delay-1">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <div className="text-[11px] font-semibold tracking-wide text-slate-500 uppercase">Total donations</div>
+                    <div className="mt-2 text-3xl font-bold text-slate-900">{dashboardData.stats.totalDonations}</div>
+                  </div>
+                  <div className="icon-box user-theme">
+                    <HeartIcon size={20} />
+                  </div>
+                </div>
+              </div>
+
+              <div className="v2-card v2-kpi p-4 animate-fade-up delay-2">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <div className="text-[11px] font-semibold tracking-wide text-slate-500 uppercase">Blood requests</div>
+                    <div className="mt-2 text-3xl font-bold text-slate-900">{dashboardData.stats.totalRequests}</div>
+                  </div>
+                  <div className="icon-box info">
+                    <DocumentIcon size={20} />
+                  </div>
+                </div>
+              </div>
+
+              <div className="v2-card v2-kpi p-4 animate-fade-up delay-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <div className="text-[11px] font-semibold tracking-wide text-slate-500 uppercase">Lives helped</div>
+                    <div className="mt-2 text-3xl font-bold text-slate-900">{dashboardData.stats.livesImpacted}</div>
+                  </div>
+                  <div className="icon-box success">
+                    <UsersIcon size={20} />
+                  </div>
+                </div>
+              </div>
+
+              <div className="v2-card v2-kpi p-4 animate-fade-up delay-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <div className="text-[11px] font-semibold tracking-wide text-slate-500 uppercase">Status</div>
+                    <div className="mt-2 text-sm font-semibold text-slate-900">Donation eligibility</div>
+                    <div className={`mt-1 text-xs font-semibold ${eligibility.canDonate ? 'text-emerald-600' : 'text-amber-600'}`}>
+                      {eligibility.message}
+                    </div>
+                  </div>
+                  <div className={`icon-box ${eligibility.canDonate ? 'success' : 'warning'}`}>
+                    {eligibility.canDonate ? <CheckIcon size={20} /> : <ClockIcon size={20} />}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* GRID: main content + right rail */}
+        <section className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* Left: activity */}
+          <div className="lg:col-span-8 space-y-6">
+            {/* Active Requests module */}
+            <div className="v2-panel overflow-hidden animate-fade-up delay-5">
+              <div className="px-6 py-5 flex items-center justify-between border-b border-slate-200/60">
+                <div>
+                  <h2 className="text-base font-semibold text-slate-900">Active Requests</h2>
+                  <p className="text-xs text-slate-600 mt-1">Your most recent blood requests and urgency</p>
+                </div>
+                <button onClick={() => navigate('/user/blood-requests')} className="section-link">
+                  View all <ArrowRightIcon size={16} />
+                </button>
+              </div>
+
+              <div className="p-4 sm:p-5">
+                {dashboardData.activeRequests.length === 0 ? (
+                  <div className="rounded-2xl border border-dashed border-slate-200 bg-white/60 p-10 text-center">
+                    <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-white shadow-sm border border-slate-200">
+                      <DropletIcon size={26} />
+                    </div>
+                    <div className="text-sm font-semibold text-slate-900">No active requests</div>
+                    <div className="mt-1 text-xs text-slate-600">Create a request if you or someone near you needs blood.</div>
+                    <div className="mt-5">
+                      <button onClick={() => navigate('/user/blood-requests')} className="btn-modern primary rounded-2xl">
+                        <DropletIcon size={18} />
+                        Create request
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {dashboardData.activeRequests.slice(0, 3).map((request) => (
+                      <div
+                        key={request._id}
+                        className="group rounded-2xl border border-slate-200/70 bg-white/70 backdrop-blur px-4 py-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
+                      >
+                        <div className="flex items-center justify-between gap-4">
+                          <div className="flex items-center gap-3 min-w-0">
+                            <div className="blood-badge" style={{ minWidth: 46, height: 46 }}>
+                              {request.bloodGroup}
+                            </div>
+                            <div className="min-w-0">
+                              <div className="text-sm font-semibold text-slate-900 truncate">
+                                {request.unitsRequired} units needed
+                              </div>
+                              <div className="mt-1 text-xs text-slate-600 truncate">
+                                {request.hospitalId?.name || 'Pending assignment'}
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-2">
+                            <span className={`status-badge ${request.urgency === 'CRITICAL' ? 'critical' : 'pending'}`}>
+                              {request.urgency === 'CRITICAL' && (
+                                <span className="status-dot error" style={{ width: '6px', height: '6px' }} />
+                              )}
+                              {request.urgency}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Context card: blood type + profile */}
+            <div className="v2-panel p-6 animate-fade-up delay-6">
+              <div className="flex items-start sm:items-center justify-between gap-4 flex-col sm:flex-row">
+                <div className="flex items-center gap-4">
+                  <div
+                    className="blood-badge text-lg"
+                    style={{ width: '58px', height: '58px', fontSize: '1.125rem' }}
+                    title={hasBloodType ? `Blood type: ${user?.bloodGroup}` : 'Blood type not set'}
+                  >
+                    {user?.bloodGroup || '?'}
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-gray-900">
-                      {request.unitsRequired} units needed
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      {request.hospitalId?.name || 'Pending assignment'}
-                    </p>
+                    <div className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Identity</div>
+                    <div className="mt-1 text-base font-semibold text-slate-900">Your blood type</div>
+                    <div className="mt-1 text-sm text-slate-600">
+                      {hasBloodType ? user?.bloodGroup : 'Not set — update your profile to personalize matches.'}
+                    </div>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2">
-                  <span className={`status-badge ${request.urgency === 'CRITICAL' ? 'critical' : 'pending'}`}>
-                    {request.urgency === 'CRITICAL' && (
-                      <span className="status-dot error" style={{ width: '6px', height: '6px' }} />
-                    )}
-                    {request.urgency}
-                  </span>
-                </div>
+                <button onClick={() => navigate('/user/profile')} className="btn-modern secondary rounded-2xl">
+                  Edit profile <ArrowRightIcon size={18} />
+                </button>
               </div>
-            ))
-          )}
-        </div>
-      </div>
-
-      {/* Blood Type Card */}
-      <div className="glass-card p-5 animate-fade-up delay-6">
-        <div className="flex items-center justify-between flex-wrap gap-4">
-          <div className="flex items-center gap-4">
-            <div className="blood-badge text-lg" style={{ width: '56px', height: '56px', fontSize: '1.125rem' }}>
-              {user?.bloodGroup || '?'}
-            </div>
-            <div>
-              <p className="text-sm font-medium text-gray-500">Your Blood Type</p>
-              <p className="text-xl font-bold text-gray-900">{user?.bloodGroup || 'Not Set'}</p>
             </div>
           </div>
-          <button
-            onClick={() => navigate('/user/profile')}
-            className="section-link text-base"
-          >
-            Edit Profile <ArrowRightIcon size={18} />
-          </button>
-        </div>
+
+          {/* Right: actions rail */}
+          <aside className="lg:col-span-4 space-y-6">
+            <div className="v2-panel p-6 animate-fade-up delay-5">
+              <div className="flex items-center justify-between">
+                <h2 className="text-base font-semibold text-slate-900">Quick Actions</h2>
+              </div>
+              <p className="mt-1 text-xs text-slate-600">Shortcuts to your most used flows</p>
+
+              <div className="mt-4 grid grid-cols-2 gap-3">
+                {quickActions.map((action) => (
+                  <button
+                    key={action.label}
+                    onClick={() => navigate(action.path)}
+                    className="group rounded-2xl border border-slate-200 bg-white/70 backdrop-blur p-4 text-left shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md v2-tap"
+                  >
+                    <div className={`icon-box ${action.color}`}>
+                      <action.icon size={20} />
+                    </div>
+                    <div className="mt-3 text-sm font-semibold text-slate-900">{action.label}</div>
+                    <div className="mt-1 text-xs text-slate-600">Open</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Last donation (if available) */}
+            <div className="v2-panel p-6 animate-fade-up delay-6">
+              <div className="flex items-center justify-between">
+                <h2 className="text-base font-semibold text-slate-900">Last Donation</h2>
+                <button onClick={() => navigate('/user/donations')} className="section-link">
+                  History <ArrowRightIcon size={16} />
+                </button>
+              </div>
+
+              <div className="mt-4 rounded-2xl border border-slate-200 bg-white/70 p-4">
+                {dashboardData.lastDonation ? (
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="min-w-0">
+                      <div className="text-sm font-semibold text-slate-900 truncate">Donation recorded</div>
+                      <div className="mt-1 text-xs text-slate-600">
+                        {formatDate(dashboardData.lastDonation.date || dashboardData.lastDonation.createdAt || dashboardData.lastDonation.updatedAt)}
+                      </div>
+                    </div>
+                    <div className="icon-box success" title="Thank you">
+                      <GiftIcon size={20} />
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-sm text-slate-600">
+                    No donations recorded yet. Schedule your first donation to start your journey.
+                  </div>
+                )}
+              </div>
+            </div>
+          </aside>
+        </section>
       </div>
     </div>
   );

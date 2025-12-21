@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import { userService } from '../../services/userService';
+import { DONATION_ELIGIBILITY_DAYS } from '../../utils/constants';
 
 const UserDonationsPage = () => {
   const [loading, setLoading] = useState(true);
@@ -35,16 +36,20 @@ const UserDonationsPage = () => {
   }
 
   const lastDonation = donations.length > 0 ? new Date(donations[0].donationDate) : null;
-  const nextDate = lastDonation ? new Date(lastDonation.getTime() + 7 * 24 * 60 * 60 * 1000) : new Date(); // Changed to 7 days
+  const nextDate = lastDonation
+    ? new Date(lastDonation.getTime() + DONATION_ELIGIBILITY_DAYS * 24 * 60 * 60 * 1000)
+    : new Date();
   const isEligible = new Date() >= nextDate;
   const today = new Date();
-  const daysUntilEligible = lastDonation ? Math.max(0, Math.ceil((nextDate - today) / (1000 * 60 * 60 * 24))) : 0;
+  const daysUntilEligible = lastDonation
+    ? Math.max(0, Math.ceil((nextDate - today) / (1000 * 60 * 60 * 24)))
+    : 0;
 
   return (
     <div className="max-w-5xl mx-auto space-y-6 p-4 animate-fade-up">
       {/* Header Hero */}
       <div className="text-center space-y-3 pt-2 animate-fade-up" style={{ animationDelay: '0.1s' }}>
-        <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-rose-600 via-pink-600 to-purple-600 bg-clip-text text-transparent">
+        <h1 className="text-3xl md:text-4xl font-bold bg-linear-to-r from-rose-600 via-pink-600 to-purple-600 bg-clip-text text-transparent">
           Your Life-Saving Journey
         </h1>
         <p className="text-gray-600 text-sm md:text-base max-w-2xl mx-auto">
@@ -66,14 +71,14 @@ const UserDonationsPage = () => {
             </div>
             <p className="text-gray-600 text-sm md:text-base">You are eligible to donate today!</p>
             <a href="/user/schedule-donation"
-              className="inline-block mt-3 px-8 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-semibold 
+              className="inline-block mt-3 px-8 py-3 bg-linear-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-semibold 
                         hover:from-indigo-700 hover:to-purple-700 transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105 text-sm md:text-base">
               Schedule Donation Now →
             </a>
           </div>
         ) : (
           <div className="space-y-3 animate-fade-up" style={{ animationDelay: '0.3s' }}>
-            <div className="inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl border border-amber-200">
+            <div className="inline-flex items-center gap-3 px-6 py-3 bg-linear-to-r from-amber-50 to-orange-50 rounded-xl border border-amber-200">
               <span className="text-2xl">⏰</span>
               <div className="text-left">
                 <div className="text-2xl md:text-3xl font-bold text-gray-800">
@@ -91,8 +96,13 @@ const UserDonationsPage = () => {
             <div className="max-w-md mx-auto mt-4">
               <div className="w-full bg-gray-200 rounded-full h-2.5">
                 <div 
-                  className="bg-gradient-to-r from-rose-500 to-pink-500 h-2.5 rounded-full transition-all duration-500"
-                  style={{ width: `${Math.min(100, ((7 - daysUntilEligible) / 7) * 100)}%` }}
+                  className="bg-linear-to-r from-rose-500 to-pink-500 h-2.5 rounded-full transition-all duration-500"
+                  style={{
+                    width: `${Math.min(
+                      100,
+                      ((DONATION_ELIGIBILITY_DAYS - daysUntilEligible) / DONATION_ELIGIBILITY_DAYS) * 100
+                    )}%`,
+                  }}
                 />
               </div>
               <p className="text-xs text-gray-500 mt-2">Recovery Progress</p>
@@ -128,7 +138,7 @@ const UserDonationsPage = () => {
       <div className="space-y-4 animate-fade-up" style={{ animationDelay: '0.55s' }}>
         <div className="flex items-center justify-between">
           <h2 className="text-xl md:text-2xl font-bold text-gray-800 flex items-center gap-2">
-            <span className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-xl flex items-center justify-center text-white shadow-sm">
+            <span className="w-10 h-10 bg-linear-to-br from-indigo-500 to-purple-500 rounded-xl flex items-center justify-center text-white shadow-sm">
               📜
             </span>
             Donation History
@@ -152,7 +162,7 @@ const UserDonationsPage = () => {
                 Schedule your first donation to begin your life-saving journey!
               </p>
               <a href="/user/schedule-donation" 
-                className="px-6 py-3 bg-gradient-to-r from-rose-600 to-pink-600 text-white text-sm md:text-base font-semibold rounded-xl 
+                className="px-6 py-3 bg-linear-to-r from-rose-600 to-pink-600 text-white text-sm md:text-base font-semibold rounded-xl 
                           hover:from-rose-700 hover:to-pink-700 transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105 inline-flex items-center gap-2">
                 <span>🩸</span> Start your journey
               </a>
@@ -217,7 +227,7 @@ const UserDonationsPage = () => {
 
       {/* Motivational Footer */}
       {donations.length > 0 && (
-        <div className="bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 rounded-2xl p-6 md:p-8 text-center border border-gray-200 animate-fade-up" 
+        <div className="bg-linear-to-r from-indigo-50 via-purple-50 to-pink-50 rounded-2xl p-6 md:p-8 text-center border border-gray-200 animate-fade-up" 
              style={{ animationDelay: '0.7s' }}>
           <p className="text-lg md:text-xl font-semibold text-gray-800 mb-2">
             🎉 Thank you for being a hero!

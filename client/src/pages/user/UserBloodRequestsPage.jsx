@@ -224,73 +224,148 @@ const UserBloodRequestsPage = () => {
         )}
 
         {/* Modal */}
-        <Modal isOpen={showNewRequestModal} onClose={() => setShowNewRequestModal(false)} title="New Blood Request" size="lg">
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <Select
-              label="Hospital"
-              name="hospitalId"
-              value={formData.hospitalId}
-              onChange={handleChange}
-              options={hospitals.map(h => ({ value: h._id, label: `${h.name} (${h.city || h.code})` }))}
-              placeholder="Select a hospital"
-              required
-            />
-            <div className="grid grid-cols-2 gap-4">
+        <Modal 
+          isOpen={showNewRequestModal} 
+          onClose={() => setShowNewRequestModal(false)} 
+          title="New Blood Request" 
+          size="lg"
+        >
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Hospital Selection - Featured Section */}
+            <div className="bg-gradient-to-br from-red-50/80 to-pink-50/80 rounded-2xl p-5 border border-red-100/60 shadow-sm">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-8 h-8 rounded-xl bg-red-500/10 flex items-center justify-center">
+                  <svg className="w-5 h-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                  </svg>
+                </div>
+                <h3 className="font-semibold text-gray-800">Select Hospital</h3>
+              </div>
               <Select
-                label="Blood Group"
-                name="bloodGroup"
-                value={formData.bloodGroup}
+                name="hospitalId"
+                value={formData.hospitalId}
                 onChange={handleChange}
-                options={BLOOD_GROUPS.map(bg => ({ value: bg, label: bg }))}
-                placeholder="Select blood group"
-                required
-              />
-              <Input
-                label="Units Required"
-                type="number"
-                name="unitsRequired"
-                value={formData.unitsRequired}
-                onChange={handleChange}
-                min="1"
-                max="10"
+                options={hospitals.map(h => ({ value: h._id, label: `${h.name} (${h.city || h.code})` }))}
+                placeholder="Choose a hospital"
                 required
               />
             </div>
-            <Select
-              label="Urgency"
-              name="urgency"
-              value={formData.urgency}
-              onChange={handleChange}
-              options={URGENCY_LEVELS.map(u => ({ value: u, label: u }))}
-            />
-            <Input
-              label="Patient Name (Optional)"
-              name="patientName"
-              value={formData.patientName}
-              onChange={handleChange}
-              placeholder="Enter patient name"
-            />
-            <Input
-              label="Medical Reason (Optional)"
-              name="medicalReason"
-              value={formData.medicalReason}
-              onChange={handleChange}
-              placeholder="e.g., Surgery, Accident, etc."
-            />
-            <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
+
+            {/* Blood Requirements - Grid Section */}
+            <div>
+              <h3 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                <DropletIcon size={18} className="text-red-500" />
+                Blood Requirements
+              </h3>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Select
+                    label="Blood Group"
+                    name="bloodGroup"
+                    value={formData.bloodGroup}
+                    onChange={handleChange}
+                    options={BLOOD_GROUPS.map(bg => ({ value: bg, label: bg }))}
+                    placeholder="Select type"
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Input
+                    label="Units Required"
+                    type="number"
+                    name="unitsRequired"
+                    value={formData.unitsRequired}
+                    onChange={handleChange}
+                    min="1"
+                    max="10"
+                    required
+                  />
+                </div>
+              </div>
+              
+              {/* Urgency Level */}
+              <div className="mt-4">
+                <Select
+                  label="Urgency Level"
+                  name="urgency"
+                  value={formData.urgency}
+                  onChange={handleChange}
+                  options={URGENCY_LEVELS.map(u => ({ value: u, label: u }))}
+                />
+                {formData.urgency === 'CRITICAL' && (
+                  <div className="mt-2 flex items-start gap-2 p-3 bg-red-50/80 border border-red-200 rounded-xl">
+                    <AlertIcon size={16} className="text-red-500 mt-0.5 flex-shrink-0" />
+                    <p className="text-xs text-red-700">
+                      Critical requests are prioritized and will be processed immediately.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Patient Information - Optional Section */}
+            <div className="bg-gray-50/80 rounded-2xl p-5 border border-gray-100/60">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-8 h-8 rounded-xl bg-blue-500/10 flex items-center justify-center">
+                  <svg className="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                </div>
+                <h3 className="font-semibold text-gray-800">Patient Information</h3>
+                <span className="text-xs text-gray-400 ml-auto">(Optional)</span>
+              </div>
+              <div className="space-y-4">
+                <Input
+                  label="Patient Name"
+                  name="patientName"
+                  value={formData.patientName}
+                  onChange={handleChange}
+                  placeholder="Enter patient full name"
+                />
+                <Input
+                  label="Medical Reason"
+                  name="medicalReason"
+                  value={formData.medicalReason}
+                  onChange={handleChange}
+                  placeholder="e.g., Surgery, Accident, Anemia, etc."
+                />
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex justify-end gap-3 pt-2">
               <button
                 type="button"
                 onClick={() => setShowNewRequestModal(false)}
-                className="btn-modern secondary"
+                className="px-6 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-200 
+                         rounded-xl hover:bg-gray-50 transition-all duration-200 hover:shadow-md
+                         hover:border-gray-300"
+                disabled={formLoading}
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={formLoading}
-                className="btn-modern primary"
+                className="px-6 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-red-500 to-red-600 
+                         rounded-xl hover:from-red-600 hover:to-red-700 transition-all duration-200 
+                         shadow-lg shadow-red-500/30 hover:shadow-xl hover:shadow-red-500/40
+                         disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
-                {formLoading ? 'Creating...' : 'Create Request'}
+                {formLoading ? (
+                  <>
+                    <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Creating Request...
+                  </>
+                ) : (
+                  <>
+                    <DropletIcon size={16} />
+                    Submit Request
+                  </>
+                )}
               </button>
             </div>
           </form>

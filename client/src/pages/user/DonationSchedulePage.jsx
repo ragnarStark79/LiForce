@@ -6,6 +6,13 @@ import LoadingSpinner from '../../components/common/LoadingSpinner';
 import { userService } from '../../services/userService';
 import { useNotification } from '../../components/common/NotificationSystem';
 import { formatDate } from '../../utils/formatters';
+import {
+  CalendarIcon,
+  CheckIcon,
+  ClockIcon,
+  DocumentIcon,
+  ArrowRightIcon,
+} from '../../components/common/DashboardIcons';
 
 const DonationSchedulePage = () => {
   const { notify } = useNotification();
@@ -44,7 +51,7 @@ const DonationSchedulePage = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleScheduleDonation = async (e) => {
@@ -83,16 +90,17 @@ const DonationSchedulePage = () => {
     }
   };
 
-  const getStatusColor = (status) => {
-    const colors = {
-      PENDING: 'bg-amber-50 text-amber-700',
-      ASSIGNED: 'bg-blue-50 text-blue-700',
-      CONFIRMED: 'bg-indigo-50 text-indigo-700',
-      COMPLETED: 'bg-green-50 text-green-700',
-      CANCELLED: 'bg-gray-100 text-gray-500',
-      NO_SHOW: 'bg-red-50 text-red-600',
+  const getStatusBadge = (status) => {
+    const map = {
+      PENDING: 'warning',
+      ASSIGNED: 'info',
+      CONFIRMED: 'user-theme',
+      COMPLETED: 'success',
+      CANCELLED: 'neutral',
+      NO_SHOW: 'danger',
     };
-    return colors[status] || 'bg-gray-100 text-gray-600';
+    const variant = map[status] || 'neutral';
+    return `status-badge ${variant}`;
   };
 
   const getMinDate = () => {
@@ -117,253 +125,297 @@ const DonationSchedulePage = () => {
     { value: '16:30', label: '4:30 PM' },
   ];
 
-  const hasPendingSchedule = schedules.some(s =>
-    ['PENDING', 'ASSIGNED', 'CONFIRMED'].includes(s.status)
+  const hasPendingSchedule = schedules.some((s) =>
+    ['PENDING', 'ASSIGNED', 'CONFIRMED'].includes(s.status),
   );
 
-  const completedCount = schedules.filter(s => s.status === 'COMPLETED').length;
-  const upcomingCount = schedules.filter(s => ['PENDING', 'ASSIGNED', 'CONFIRMED'].includes(s.status)).length;
+  const completedCount = schedules.filter((s) => s.status === 'COMPLETED').length;
+  const upcomingCount = schedules.filter((s) => ['PENDING', 'ASSIGNED', 'CONFIRMED'].includes(s.status)).length;
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-96">
-        <LoadingSpinner size="lg" />
+      <div className="v2-bg">
+        <div className="v2-container max-w-6xl mx-auto space-y-6 pb-10">
+          <div className="v2-panel p-6 sm:p-8">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="h-10 w-64 v2-skeleton" />
+                <div className="mt-3 h-4 w-80 max-w-full v2-skeleton v2-skeleton-muted" />
+              </div>
+              <div className="h-10 w-40 v2-skeleton" />
+            </div>
+            <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="h-20 v2-skeleton" />
+              <div className="h-20 v2-skeleton" />
+              <div className="h-20 v2-skeleton" />
+            </div>
+            <div className="mt-6 h-64 v2-skeleton" />
+          </div>
+          <div className="flex items-center justify-center py-6">
+            <LoadingSpinner size="lg" />
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6 p-4">
-      {/* Header */}
-      <div className="flex items-center justify-between animate-fade-up">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-800">Donation Schedule</h1>
-          <p className="text-gray-500 mt-1 text-sm">Book your donation appointments</p>
-        </div>
-        <button
-          onClick={() => setShowScheduleModal(true)}
-          disabled={hasPendingSchedule}
-          className="px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-sm font-semibold rounded-xl 
-                    hover:from-indigo-700 hover:to-purple-700 disabled:from-gray-300 disabled:to-gray-400 
-                    disabled:cursor-not-allowed transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105"
-        >
-          <span className="inline-flex items-center gap-2">
-            <span>📅</span> New Schedule
-          </span>
-        </button>
-      </div>
-
-      {/* Stats - Compact Grid with Animation */}
-      <div className="grid grid-cols-3 gap-4 animate-fade-up" style={{ animationDelay: '0.1s' }}>
-        {[
-          { label: 'Total', value: schedules.length, icon: '📊', color: 'from-blue-400 to-indigo-500', bgColor: 'bg-blue-50', delay: '0.15s' },
-          { label: 'Completed', value: completedCount, icon: '✅', color: 'from-emerald-400 to-green-500', bgColor: 'bg-emerald-50', delay: '0.2s' },
-          { label: 'Upcoming', value: upcomingCount, icon: '⏰', color: 'from-amber-400 to-orange-500', bgColor: 'bg-amber-50', delay: '0.25s' },
-        ].map((stat) => (
-          <div 
-            key={stat.label} 
-            className={`${stat.bgColor} rounded-xl p-4 border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1 animate-fade-up`}
-            style={{ animationDelay: stat.delay }}
-          >
-            <div className="flex flex-col items-center text-center">
-              <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${stat.color} flex items-center justify-center text-lg mb-2 shadow-sm transform transition-transform duration-300 hover:scale-110`}>
-                {stat.icon}
+    <div className="v2-bg">
+      <div className="v2-container max-w-6xl mx-auto space-y-6 pb-10">
+        {/* Header */}
+        <section className="v2-panel p-6 sm:p-8 animate-fade-up">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+            <div className="min-w-0">
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-slate-200 bg-white/60 shadow-sm">
+                <span className="w-2 h-2 rounded-full" style={{ background: 'linear-gradient(135deg, #ef4444, #f97316)' }} />
+                <span className="text-xs font-semibold text-slate-700">Donation Scheduling</span>
               </div>
-              <p className="text-2xl font-bold text-gray-800">{stat.value}</p>
-              <p className="text-xs text-gray-600 font-medium uppercase tracking-wide mt-0.5">{stat.label}</p>
+              <h1 className="mt-4 v2-title">Donation Schedule</h1>
+              <p className="mt-2 v2-subtitle">Book and manage your donation appointments.</p>
             </div>
-          </div>
-        ))}
-      </div>
 
-      {/* Warning */}
-      {hasPendingSchedule && (
-        <div className="bg-amber-50 rounded-xl p-4 border border-amber-200 flex items-start gap-3 animate-fade-up" style={{ animationDelay: '0.3s' }}>
-          <span className="text-amber-600 text-xl">⚠️</span>
-          <p className="text-sm text-amber-700 flex-1">
-            You have an active schedule. Complete or cancel it before scheduling a new one.
-          </p>
-        </div>
-      )}
-
-      {/* Schedules List */}
-      <div className="bg-white rounded-xl border border-gray-100 overflow-hidden shadow-sm animate-fade-up" style={{ animationDelay: '0.35s' }}>
-        <div className="px-5 py-4 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-gray-100">
-          <h3 className="font-semibold text-gray-800 flex items-center gap-2">
-            <span className="text-lg">📋</span> Your Schedules
-          </h3>
-        </div>
-
-        {schedules.length === 0 ? (
-          <div className="p-8 text-center animate-fade-up" style={{ animationDelay: '0.4s' }}>
-            <div className="w-16 h-16 mx-auto bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl flex items-center justify-center text-3xl mb-4 animate-bounce-slow">
-              📅
-            </div>
-            <p className="text-gray-700 font-medium mb-1">No scheduled donations</p>
-            <p className="text-sm text-gray-500 mb-4">Schedule your first donation appointment</p>
             <button
               onClick={() => setShowScheduleModal(true)}
-              className="px-5 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-sm font-semibold rounded-lg 
-                        hover:from-indigo-700 hover:to-purple-700 transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105"
+              disabled={hasPendingSchedule}
+              className={`btn-modern ${hasPendingSchedule ? 'secondary' : 'primary'} rounded-2xl`}
+              title={hasPendingSchedule ? 'You already have an active appointment' : 'Create a new schedule'}
             >
-              Schedule Donation
+              <CalendarIcon size={18} />
+              New Schedule
             </button>
           </div>
-        ) : (
-          <div className="divide-y divide-gray-100">
-            {schedules.map((schedule, index) => (
-              <div 
-                key={schedule._id} 
-                className="p-5 hover:bg-gray-50 transition-all duration-300 animate-fade-up group"
-                style={{ animationDelay: `${0.4 + index * 0.05}s` }}
-              >
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex items-start gap-3 flex-1">
-                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center text-xl flex-shrink-0 transform transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3">
-                      🏥
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1 flex-wrap">
-                        <span className="font-semibold text-gray-900 truncate">
-                          {schedule.hospitalId?.name || 'Hospital'}
-                        </span>
-                        <span className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all duration-300 ${getStatusColor(schedule.status)}`}>
-                          {schedule.status}
-                        </span>
-                      </div>
-                      <p className="text-sm text-gray-500 mb-2">
-                        {schedule.hospitalId?.city}, {schedule.hospitalId?.state}
-                      </p>
 
-                      <div className="flex items-center gap-4 text-sm text-gray-600 flex-wrap">
-                        <span className="flex items-center gap-1.5 bg-gray-50 px-2.5 py-1 rounded-lg hover:bg-gray-100 transition-colors">
-                          <span className="text-gray-400">📆</span>
-                          {formatDate(schedule.scheduledDate)}
-                        </span>
-                        <span className="flex items-center gap-1.5 bg-gray-50 px-2.5 py-1 rounded-lg hover:bg-gray-100 transition-colors">
-                          <span className="text-gray-400">⏰</span>
-                          {schedule.scheduledTime}
-                        </span>
-                      </div>
-
-                      {schedule.assignedStaffId && (
-                        <p className="text-xs text-gray-500 mt-2 bg-gray-50 rounded-lg px-2.5 py-1.5 inline-block hover:bg-gray-100 transition-colors">
-                          👤 {schedule.assignedStaffId.name} • 📞 {schedule.assignedStaffId.phone}
-                        </p>
-                      )}
-
-                      {schedule.notes && (
-                        <p className="text-xs text-gray-500 mt-2 italic bg-blue-50 rounded-lg px-2.5 py-1.5 inline-block">
-                          💬 {schedule.notes}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-
-                  {['PENDING', 'ASSIGNED', 'CONFIRMED'].includes(schedule.status) && (
-                    <button
-                      onClick={() => handleCancelSchedule(schedule._id)}
-                      className="text-xs font-semibold text-gray-400 hover:text-red-600 transition-all duration-300 px-3 py-1.5 rounded-lg hover:bg-red-50 flex-shrink-0 transform hover:scale-105"
-                    >
-                      Cancel
-                    </button>
-                  )}
+          {/* Stats */}
+          <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="v2-card v2-kpi p-4">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <div className="text-[11px] font-semibold tracking-wide text-slate-500 uppercase">Total</div>
+                  <div className="mt-2 text-3xl font-bold text-slate-900">{schedules.length}</div>
+                </div>
+                <div className="icon-box info">
+                  <DocumentIcon size={20} />
                 </div>
               </div>
-            ))}
+            </div>
+
+            <div className="v2-card v2-kpi p-4">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <div className="text-[11px] font-semibold tracking-wide text-slate-500 uppercase">Completed</div>
+                  <div className="mt-2 text-3xl font-bold text-slate-900">{completedCount}</div>
+                </div>
+                <div className="icon-box success">
+                  <CheckIcon size={20} />
+                </div>
+              </div>
+            </div>
+
+            <div className="v2-card v2-kpi p-4">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <div className="text-[11px] font-semibold tracking-wide text-slate-500 uppercase">Upcoming</div>
+                  <div className="mt-2 text-3xl font-bold text-slate-900">{upcomingCount}</div>
+                </div>
+                <div className="icon-box warning">
+                  <ClockIcon size={20} />
+                </div>
+              </div>
+            </div>
           </div>
-        )}
-      </div>
 
-      {/* Modal */}
-      <Modal
-        isOpen={showScheduleModal}
-        onClose={() => setShowScheduleModal(false)}
-        title="Schedule Donation"
-        size="md"
-      >
-        <form onSubmit={handleScheduleDonation} className="space-y-4">
-          <Select
-            label="Hospital"
-            name="hospitalId"
-            value={formData.hospitalId}
-            onChange={handleChange}
-            options={[
-              { value: '', label: 'Select a hospital...' },
-              ...hospitals.map(h => ({
-                value: h._id,
-                label: `${h.name} - ${h.city}, ${h.state}`
-              }))
-            ]}
-            required
-          />
+          {/* Warning */}
+          {hasPendingSchedule && (
+            <div className="mt-5 glass-card-solid p-4 rounded-2xl border border-amber-200/60 bg-amber-50/50">
+              <div className="flex items-start gap-3">
+                <div className="icon-box warning shrink-0">
+                  <ClockIcon size={18} />
+                </div>
+                <div className="min-w-0">
+                  <div className="text-sm font-semibold text-slate-900">Active appointment detected</div>
+                  <div className="text-xs text-slate-600 mt-1">
+                    Complete or cancel your current schedule before creating a new one.
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </section>
 
-          <Input
-            label="Date"
-            type="date"
-            name="scheduledDate"
-            value={formData.scheduledDate}
-            onChange={handleChange}
-            min={getMinDate()}
-            required
-          />
+        {/* List */}
+        <section className="v2-panel overflow-hidden animate-fade-up">
+          <div className="px-6 py-5 flex items-center justify-between border-b border-slate-200/60">
+            <div>
+              <h2 className="text-base font-semibold text-slate-900">Your Schedules</h2>
+              <p className="text-xs text-slate-600 mt-1">Upcoming and historical appointments</p>
+            </div>
+          </div>
 
-          <Select
-            label="Time"
-            name="scheduledTime"
-            value={formData.scheduledTime}
-            onChange={handleChange}
-            options={[
-              { value: '', label: 'Select a time...' },
-              ...timeSlots
-            ]}
-            required
-          />
+          {schedules.length === 0 ? (
+            <div className="p-10 text-center">
+              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-white shadow-sm border border-slate-200">
+                <CalendarIcon size={26} />
+              </div>
+              <div className="text-sm font-semibold text-slate-900">No scheduled donations</div>
+              <div className="mt-1 text-xs text-slate-600">Schedule your first donation appointment.</div>
+              <div className="mt-5">
+                <button
+                  onClick={() => setShowScheduleModal(true)}
+                  className="btn-modern primary rounded-2xl"
+                >
+                  <CalendarIcon size={18} />
+                  Schedule donation
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="divide-y divide-slate-200/60">
+              {schedules.map((schedule) => {
+                const isActive = ['PENDING', 'ASSIGNED', 'CONFIRMED'].includes(schedule.status);
+                const canBookAnother = !hasPendingSchedule;
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Notes (Optional)
-            </label>
-            <textarea
-              name="notes"
-              value={formData.notes}
+                return (
+                  <div key={schedule._id} className="p-5 sm:p-6 hover:bg-slate-50/60 transition-colors">
+                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <div className="text-sm font-semibold text-slate-900 truncate">
+                            {schedule.hospitalId?.name || 'Hospital'}
+                          </div>
+                          <span className={getStatusBadge(schedule.status)}>{schedule.status}</span>
+                        </div>
+
+                        <div className="mt-1 text-xs text-slate-600">
+                          {schedule.hospitalId?.city}{schedule.hospitalId?.city ? ',' : ''} {schedule.hospitalId?.state}
+                        </div>
+
+                        <div className="mt-3 flex flex-wrap items-center gap-2">
+                          <span className="status-badge neutral">
+                            <CalendarIcon size={14} />
+                            {formatDate(schedule.scheduledDate)}
+                          </span>
+                          <span className="status-badge neutral">
+                            <ClockIcon size={14} />
+                            {schedule.scheduledTime}
+                          </span>
+                        </div>
+
+                        {schedule.assignedStaffId && (
+                          <div className="mt-3 text-xs text-slate-600">
+                            <span className="font-semibold text-slate-700">Staff:</span> {schedule.assignedStaffId.name} • {schedule.assignedStaffId.phone}
+                          </div>
+                        )}
+
+                        {schedule.notes && (
+                          <div className="mt-2 text-xs text-slate-600">
+                            <span className="font-semibold text-slate-700">Notes:</span> {schedule.notes}
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="flex items-center gap-2 sm:justify-end">
+                        {isActive && (
+                          <button
+                            onClick={() => handleCancelSchedule(schedule._id)}
+                            className="btn-modern secondary rounded-2xl"
+                          >
+                            Cancel
+                          </button>
+                        )}
+
+                        {/* Booking is available via the header/empty-state CTA only */}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </section>
+
+        {/* Modal */}
+        <Modal
+          isOpen={showScheduleModal}
+          onClose={() => setShowScheduleModal(false)}
+          title="Schedule Donation"
+          size="md"
+        >
+          <form onSubmit={handleScheduleDonation} className="space-y-4">
+            <Select
+              label="Hospital"
+              name="hospitalId"
+              value={formData.hospitalId}
               onChange={handleChange}
-              rows={3}
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 
-                        focus:ring-gray-900 focus:border-transparent transition-all"
-              placeholder="Any special requirements..."
+              options={[
+                { value: '', label: 'Select a hospital...' },
+                ...hospitals.map((h) => ({
+                  value: h._id,
+                  label: `${h.name} - ${h.city}, ${h.state}`,
+                })),
+              ]}
+              required
             />
-          </div>
 
-          <div className="bg-gray-50 rounded-xl p-4 text-sm text-gray-600">
-            <p className="font-medium text-gray-700 mb-2">Before your appointment:</p>
-            <ul className="space-y-1 text-gray-500">
-              <li>• Get a good night's sleep</li>
-              <li>• Eat a healthy meal</li>
-              <li>• Drink plenty of water</li>
-              <li>• Bring a valid ID</li>
-            </ul>
-          </div>
+            <Input
+              label="Date"
+              type="date"
+              name="scheduledDate"
+              value={formData.scheduledDate}
+              onChange={handleChange}
+              min={getMinDate()}
+              required
+            />
 
-          <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
-            <button
-              type="button"
-              onClick={() => setShowScheduleModal(false)}
-              className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={formLoading}
-              className="px-4 py-2.5 bg-gray-900 text-white text-sm font-medium rounded-xl 
-                        hover:bg-gray-800 disabled:bg-gray-300 transition-colors"
-            >
-              {formLoading ? 'Scheduling...' : 'Schedule'}
-            </button>
-          </div>
-        </form>
-      </Modal>
+            <Select
+              label="Time"
+              name="scheduledTime"
+              value={formData.scheduledTime}
+              onChange={handleChange}
+              options={[{ value: '', label: 'Select a time...' }, ...timeSlots]}
+              required
+            />
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Notes (Optional)</label>
+              <textarea
+                name="notes"
+                value={formData.notes}
+                onChange={handleChange}
+                rows={3}
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all"
+                placeholder="Any special requirements..."
+              />
+            </div>
+
+            <div className="glass-card-solid rounded-2xl p-4 text-sm text-slate-600">
+              <p className="font-semibold text-slate-900 mb-2">Before your appointment</p>
+              <ul className="space-y-1 text-slate-600">
+                <li>• Get a good night's sleep</li>
+                <li>• Eat a healthy meal</li>
+                <li>• Drink plenty of water</li>
+                <li>• Bring a valid ID</li>
+              </ul>
+            </div>
+
+            <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
+              <button
+                type="button"
+                onClick={() => setShowScheduleModal(false)}
+                className="btn-modern secondary rounded-2xl"
+              >
+                Close
+              </button>
+              <button
+                type="submit"
+                disabled={formLoading}
+                className="btn-modern primary rounded-2xl"
+              >
+                {formLoading ? 'Scheduling...' : 'Schedule'}
+              </button>
+            </div>
+          </form>
+        </Modal>
+      </div>
     </div>
   );
 };
