@@ -1,12 +1,27 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { userService } from '../../services/userService';
 import { useNotification } from '../../components/common/NotificationSystem';
 import { BLOOD_GROUPS } from '../../utils/constants';
+import {
+  HeartIcon,
+  DocumentIcon,
+  CalendarIcon,
+  DropletIcon,
+  GiftIcon,
+  ArrowRightIcon,
+  CheckIcon,
+  ClockIcon,
+  UserIcon,
+  ChatIcon,
+  AlertIcon
+} from '../../components/common/DashboardIcons';
 
 const UserProfilePage = () => {
   const { user, updateUser } = useAuth();
   const { notify } = useNotification();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -26,6 +41,7 @@ const UserProfilePage = () => {
   useEffect(() => {
     fetchProfile();
     fetchDashboardStats();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchDashboardStats = async () => {
@@ -109,279 +125,417 @@ const UserProfilePage = () => {
     });
   };
 
+  const completion = (() => {
+    const fields = ['name', 'email', 'phone', 'bloodGroup', 'address', 'city', 'state', 'zipCode'];
+    const filled = fields.filter((k) => Boolean(displayUser?.[k]) || Boolean(formData?.[k])).length;
+    return Math.round((filled / fields.length) * 100);
+  })();
+
+  // Define account detail fields with icons
+  const accountFields = [
+    { label: 'Full Name', key: 'name', icon: UserIcon, color: 'user-theme' },
+    { label: 'Email', key: 'email', icon: ChatIcon, color: 'info' },
+    { label: 'Phone', key: 'phone', icon: CalendarIcon, color: 'success' },
+    { label: 'Blood Group', key: 'bloodGroup', icon: DropletIcon, color: 'danger' },
+    { label: 'Address', key: 'address', icon: DocumentIcon, color: 'user-theme' },
+    { label: 'City', key: 'city', icon: HeartIcon, color: 'info' },
+    { label: 'State', key: 'state', icon: GiftIcon, color: 'warning' },
+    { label: 'ZIP Code', key: 'zipCode', icon: CheckIcon, color: 'success' },
+  ];
+
+  const quickActions = [
+    { label: 'Schedule Donation', icon: CalendarIcon, path: '/user/schedule-donation', color: 'success' },
+    { label: 'Request Blood', icon: DropletIcon, path: '/user/blood-requests', color: 'danger' },
+    { label: 'View Donations', icon: GiftIcon, path: '/user/donations', color: 'user-theme' },
+    { label: 'Dashboard', icon: ArrowRightIcon, path: '/user/dashboard', color: 'info' },
+  ];
+
+  if (loading) {
+    return (
+      <div className="v2-bg min-h-screen">
+        <div className="v2-container max-w-5xl mx-auto space-y-6 pb-10 px-4 pt-6">
+          {/* Hero skeleton */}
+          <div className="v2-panel p-6">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-5">
+              <div className="h-16 w-16 rounded-2xl v2-skeleton shrink-0" />
+              <div className="space-y-3 flex-1">
+                <div className="h-6 w-40 v2-skeleton" />
+                <div className="h-5 w-56 v2-skeleton v2-skeleton-muted" />
+              </div>
+            </div>
+            <div className="mt-5 grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div className="h-20 rounded-xl v2-skeleton" />
+              <div className="h-20 rounded-xl v2-skeleton" />
+              <div className="h-20 rounded-xl v2-skeleton" />
+              <div className="h-20 rounded-xl v2-skeleton" />
+            </div>
+          </div>
+
+          {/* Content skeleton */}
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+            <div className="lg:col-span-3 v2-panel p-5">
+              <div className="h-6 w-40 v2-skeleton" />
+              <div className="mt-4 space-y-3">
+                {[...Array(8)].map((_, i) => (
+                  <div key={i} className="h-14 rounded-xl v2-skeleton" />
+                ))}
+              </div>
+            </div>
+            <div className="lg:col-span-2 space-y-5">
+              <div className="v2-panel p-5">
+                <div className="h-6 w-32 v2-skeleton" />
+                <div className="mt-4 grid grid-cols-2 gap-3">
+                  <div className="h-20 rounded-xl v2-skeleton" />
+                  <div className="h-20 rounded-xl v2-skeleton" />
+                  <div className="h-20 rounded-xl v2-skeleton" />
+                  <div className="h-20 rounded-xl v2-skeleton" />
+                </div>
+              </div>
+              <div className="v2-panel p-5">
+                <div className="h-6 w-36 v2-skeleton" />
+                <div className="mt-4 space-y-3">
+                  <div className="h-14 rounded-xl v2-skeleton" />
+                  <div className="h-14 rounded-xl v2-skeleton" />
+                  <div className="h-14 rounded-xl v2-skeleton" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="max-w-6xl mx-auto space-y-6 fade-in p-4">
-      {/* Hero Profile Header - Softer Design */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 p-8 border border-gray-100 shadow-sm">
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute -top-20 -right-20 w-64 h-64 bg-gradient-to-br from-blue-100/30 to-purple-100/30 rounded-full blur-3xl" />
-          <div className="absolute -bottom-20 -left-20 w-80 h-80 bg-gradient-to-br from-pink-100/30 to-rose-100/30 rounded-full blur-3xl" />
-        </div>
-
-        <div className="relative z-10">
-          <div className="flex flex-col md:flex-row items-center gap-6">
-            <div className="relative">
-              <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center
-                             text-4xl font-bold text-white shadow-lg">
-                {displayUser?.name?.charAt(0)?.toUpperCase() || '👤'}
+    <div className="v2-bg min-h-screen">
+      <div className="v2-container max-w-5xl mx-auto space-y-6 pb-10 px-4 pt-6">
+        {/* HERO */}
+        <section className="v2-panel p-6 animate-fade-up">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-5">
+            {/* Avatar */}
+            <div className="relative shrink-0">
+              <div className="rounded-2xl bg-linear-to-br from-red-500 to-rose-600 flex items-center justify-center text-2xl font-bold text-white shadow-lg"
+                   style={{ width: '64px', height: '64px' }}>
+                {displayUser?.name?.charAt(0)?.toUpperCase() || '?'}
               </div>
-              <div className={`absolute -bottom-2 -right-2 px-2.5 py-1 rounded-lg text-xs font-semibold shadow-md
-                             ${displayUser?.isEmailVerified
-                  ? 'bg-emerald-500 text-white'
-                  : 'bg-amber-400 text-white'}`}>
-                {displayUser?.isEmailVerified ? '✔ Verified' : '⚠ Unverified'}
+              <div className={`absolute -bottom-1 -right-1 px-2 py-0.5 rounded-lg text-[10px] font-semibold border shadow-sm ${displayUser?.isEmailVerified ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-amber-50 text-amber-800 border-amber-200'}`}>
+                {displayUser?.isEmailVerified ? '✓' : '!'}
               </div>
             </div>
 
-            <div className="flex-1 text-center md:text-left">
-              <h1 className="text-3xl font-bold text-gray-800 mb-1">{displayUser?.name}</h1>
-              <p className="text-gray-600 text-base flex items-center justify-center md:justify-start gap-2 mb-3">
-                <span className="text-lg">✉️</span> {displayUser?.email}
-              </p>
-              <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
-                <span className="px-3 py-1.5 bg-white/80 backdrop-blur-sm rounded-lg text-gray-700 text-sm font-medium border border-gray-200 shadow-sm">
-                  🩸 {displayUser?.bloodGroup || 'Not set'}
+            {/* Info */}
+            <div className="min-w-0 flex-1">
+              <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full border border-slate-200 bg-white/60 shadow-sm mb-2">
+                <span className="w-2 h-2 rounded-full bg-red-500" />
+                <span className="text-xs font-semibold text-slate-600">Profile</span>
+              </div>
+
+              <h1 className="text-xl sm:text-2xl font-bold text-slate-900 truncate">{displayUser?.name || 'Your profile'}</h1>
+              <p className="text-sm text-slate-500 truncate">{displayUser?.email || '—'}</p>
+
+              <div className="mt-2 flex flex-wrap items-center gap-2">
+                <span className="blood-badge" style={{ minWidth: '36px', height: '28px', fontSize: '12px', padding: '0 10px' }}>
+                  {displayUser?.bloodGroup || '?'}
                 </span>
-                <span className="px-3 py-1.5 bg-white/80 backdrop-blur-sm rounded-lg text-gray-700 text-sm font-medium border border-gray-200 shadow-sm">
-                  📅 Member since {formatDate(displayUser?.createdAt)}
+                <span className="px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-100 text-slate-600">
+                  Since {formatDate(displayUser?.createdAt)}
                 </span>
               </div>
             </div>
 
-            {!isEditing && (
-              <button
-                onClick={() => setIsEditing(true)}
-                className="px-6 py-2.5 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-xl font-semibold shadow-md 
-                         hover:shadow-lg transform transition-all duration-300 hover:scale-105
-                         flex items-center gap-2"
-              >
-                <span>✏️</span> Edit Profile
+            {/* Actions */}
+            <div className="flex items-center gap-2 shrink-0">
+              <button onClick={fetchProfile} className="btn-modern secondary rounded-xl text-sm px-4 py-2">
+                Refresh
               </button>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Stats Cards - Compact & Elegant */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {[
-          { label: 'Donations', value: stats.totalDonations, icon: '💝', color: 'from-rose-400 to-pink-500', bgColor: 'bg-rose-50', textColor: 'text-rose-600' },
-          { label: 'Requests', value: stats.totalRequests, icon: '🩸', color: 'from-red-400 to-rose-500', bgColor: 'bg-red-50', textColor: 'text-red-600' },
-          { label: 'Lives Saved', value: stats.totalDonations * 3, icon: '❤️', color: 'from-pink-400 to-rose-500', bgColor: 'bg-pink-50', textColor: 'text-pink-600' },
-          { label: 'Points', value: stats.totalDonations * 100, icon: '⭐', color: 'from-amber-400 to-orange-500', bgColor: 'bg-amber-50', textColor: 'text-amber-600' },
-        ].map((stat) => (
-          <div
-            key={stat.label}
-            className={`${stat.bgColor} rounded-2xl p-5 border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-0.5`}
-          >
-            <div className="flex flex-col items-center text-center">
-              <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${stat.color} flex items-center justify-center text-xl mb-3 shadow-sm`}>
-                {stat.icon}
-              </div>
-              <p className={`text-3xl font-bold ${stat.textColor} mb-1`}>{stat.value}</p>
-              <p className="text-gray-600 text-sm font-medium uppercase tracking-wide">{stat.label}</p>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {isEditing ? (
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-xl overflow-hidden">
-          <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-100">
-            <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-              <span className="w-8 h-8 rounded-lg bg-gradient-to-br from-red-500 to-pink-600 
-                             flex items-center justify-center text-white text-sm">✏️</span>
-              Update Your Information
-            </h3>
-          </div>
-          <div className="p-8">
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Full Name</label>
-                  <input
-                    type="text"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-red-500 focus:ring-4 focus:ring-red-500/10 transition-all bg-gray-50 focus:bg-white outline-none"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Phone Number</label>
-                  <input
-                    type="tel"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleChange}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-red-500 focus:ring-4 focus:ring-red-500/10 transition-all bg-gray-50 focus:bg-white outline-none"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Blood Group</label>
-                  <select
-                    name="bloodGroup"
-                    value={formData.bloodGroup}
-                    onChange={handleChange}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-red-500 focus:ring-4 focus:ring-red-500/10 transition-all bg-gray-50 focus:bg-white outline-none"
-                  >
-                    <option value="">Select Blood Group</option>
-                    {BLOOD_GROUPS.map(bg => (
-                      <option key={bg} value={bg}>{bg}</option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">ZIP Code</label>
-                  <input
-                    type="text"
-                    name="zipCode"
-                    value={formData.zipCode}
-                    onChange={handleChange}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-red-500 focus:ring-4 focus:ring-red-500/10 transition-all bg-gray-50 focus:bg-white outline-none"
-                  />
-                </div>
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Address</label>
-                  <input
-                    type="text"
-                    name="address"
-                    value={formData.address}
-                    onChange={handleChange}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-red-500 focus:ring-4 focus:ring-red-500/10 transition-all bg-gray-50 focus:bg-white outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">City</label>
-                  <input
-                    type="text"
-                    name="city"
-                    value={formData.city}
-                    onChange={handleChange}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-red-500 focus:ring-4 focus:ring-red-500/10 transition-all bg-gray-50 focus:bg-white outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">State</label>
-                  <input
-                    type="text"
-                    name="state"
-                    value={formData.state}
-                    onChange={handleChange}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-red-500 focus:ring-4 focus:ring-red-500/10 transition-all bg-gray-50 focus:bg-white outline-none"
-                  />
-                </div>
-              </div>
-
-              <div className="flex justify-end gap-4 pt-4 border-t border-gray-100">
-                <button
-                  type="button"
-                  onClick={() => setIsEditing(false)}
-                  className="px-6 py-3 rounded-xl font-bold text-gray-600 hover:bg-gray-100 transition-colors"
-                >
+              {!isEditing ? (
+                <button onClick={() => setIsEditing(true)} className="btn-modern primary rounded-xl text-sm px-4 py-2">
+                  Edit <ArrowRightIcon size={14} />
+                </button>
+              ) : (
+                <button onClick={() => setIsEditing(false)} className="btn-modern secondary rounded-xl text-sm px-4 py-2">
                   Cancel
                 </button>
-                <button
-                  type="submit"
-                  disabled={saving}
-                  className="px-8 py-3 bg-red-600 text-white rounded-xl font-bold shadow-lg hover:bg-red-700 transform transition-all hover:scale-105 disabled:opacity-50"
-                >
-                  {saving ? 'Saving...' : 'Save Changes'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      ) : (
-        <div className="grid md:grid-cols-2 gap-6">
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-lg overflow-hidden h-full">
-            <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-100">
-              <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-                <span className="w-8 h-8 rounded-lg bg-gradient-to-br from-red-500 to-rose-600 
-                               flex items-center justify-center text-white text-sm">👤</span>
-                Personal Information
-              </h3>
-            </div>
-            <div className="p-6 space-y-4">
-              {[
-                { label: 'Full Name', value: displayUser?.name, icon: '📝' },
-                { label: 'Email', value: displayUser?.email, icon: '✉️' },
-                { label: 'Phone', value: displayUser?.phone || 'Not provided', icon: '📱' },
-                { label: 'Blood Group', value: displayUser?.bloodGroup || 'Not set', icon: '🩸' },
-              ].map((item, index) => (
-                <div key={index} className="flex items-center justify-between p-3 rounded-xl bg-gray-50 
-                                           hover:bg-gray-100 transition-colors">
-                  <div className="flex items-center gap-3">
-                    <span className="text-lg">{item.icon}</span>
-                    <span className="text-gray-600 text-sm">{item.label}</span>
-                  </div>
-                  <span className="font-semibold text-gray-800">{item.value}</span>
-                </div>
-              ))}
+              )}
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-lg overflow-hidden h-full">
-            <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-100">
-              <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-                <span className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500 to-amber-600 
-                               flex items-center justify-center text-white text-sm">📍</span>
-                Contact & Address
-              </h3>
-            </div>
-            <div className="p-6 space-y-4">
-              {[
-                { label: 'Address', value: displayUser?.address || 'Not provided', icon: '🏠' },
-                { label: 'City', value: displayUser?.city || 'Not provided', icon: '🌆' },
-                { label: 'State', value: displayUser?.state || 'Not provided', icon: '🗺️' },
-                { label: 'ZIP Code', value: displayUser?.zipCode || 'Not provided', icon: '📮' },
-              ].map((item, index) => (
-                <div key={index} className="flex items-center justify-between p-3 rounded-xl bg-gray-50 
-                                           hover:bg-gray-100 transition-colors">
-                  <div className="flex items-center gap-3">
-                    <span className="text-lg">{item.icon}</span>
-                    <span className="text-gray-600 text-sm">{item.label}</span>
-                  </div>
-                  <span className="font-semibold text-gray-800 text-right">{item.value}</span>
+          {/* KPI row */}
+          <div className="mt-5 grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div className="v2-card p-4 animate-fade-up delay-1">
+              <div className="flex items-center gap-3">
+                <div className="icon-box user-theme" style={{ width: '40px', height: '40px', borderRadius: '10px' }}>
+                  <HeartIcon size={18} />
                 </div>
-              ))}
+                <div>
+                  <div className="text-xs font-semibold text-slate-500 uppercase">Donations</div>
+                  <div className="text-2xl font-bold text-slate-900">{stats.totalDonations}</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="v2-card p-4 animate-fade-up delay-2">
+              <div className="flex items-center gap-3">
+                <div className="icon-box info" style={{ width: '40px', height: '40px', borderRadius: '10px' }}>
+                  <DocumentIcon size={18} />
+                </div>
+                <div>
+                  <div className="text-xs font-semibold text-slate-500 uppercase">Requests</div>
+                  <div className="text-2xl font-bold text-slate-900">{stats.totalRequests}</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="v2-card p-4 animate-fade-up delay-3">
+              <div className="flex items-center gap-3">
+                <div className="icon-box success" style={{ width: '40px', height: '40px', borderRadius: '10px' }}>
+                  <GiftIcon size={18} />
+                </div>
+                <div>
+                  <div className="text-xs font-semibold text-slate-500 uppercase">Lives helped</div>
+                  <div className="text-2xl font-bold text-slate-900">{stats.totalDonations * 3}</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="v2-card p-4 animate-fade-up delay-4">
+              <div className="flex items-center gap-3">
+                <div className={`icon-box ${completion >= 70 ? 'success' : 'warning'}`} style={{ width: '40px', height: '40px', borderRadius: '10px' }}>
+                  {completion >= 70 ? <CheckIcon size={18} /> : <ClockIcon size={18} />}
+                </div>
+                <div>
+                  <div className="text-xs font-semibold text-slate-500 uppercase">Complete</div>
+                  <div className="text-2xl font-bold text-slate-900">{completion}%</div>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        </section>
 
-      {/* Quick Actions - Compact Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {[
-          { label: 'Schedule Donation', icon: '📅', color: 'from-emerald-500 to-teal-500', bgHover: 'hover:from-emerald-600 hover:to-teal-600', href: '/user/schedule-donation' },
-          { label: 'Request Blood', icon: '🩸', color: 'from-rose-500 to-pink-500', bgHover: 'hover:from-rose-600 hover:to-pink-600', href: '/user/blood-requests' },
-          { label: 'View Donations', icon: '💝', color: 'from-purple-500 to-indigo-500', bgHover: 'hover:from-purple-600 hover:to-indigo-600', href: '/user/donations' },
-        ].map((action) => (
-          <a
-            key={action.label}
-            href={action.href}
-            className={`relative overflow-hidden rounded-xl p-6 bg-gradient-to-br ${action.color} ${action.bgHover} 
-                       shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105 group cursor-pointer
-                       flex items-center justify-between text-white no-underline`}
-          >
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center text-2xl">
-                {action.icon}
+        {/* CONTENT - Grid layout: 3 columns for details, 2 for sidebar */}
+        <section className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+          {/* Left: Account Details */}
+          <div className="lg:col-span-3">
+            {isEditing ? (
+              <div className="v2-panel overflow-hidden animate-fade-up">
+                <div className="px-6 py-4 flex items-center justify-between border-b border-slate-200/60">
+                  <div>
+                    <h2 className="text-base font-semibold text-slate-900">Edit Profile</h2>
+                    <p className="text-xs text-slate-500 mt-0.5">Update your personal information</p>
+                  </div>
+                </div>
+
+                <div className="p-5">
+                  <form onSubmit={handleSubmit} className="space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-600 mb-1.5">Full Name</label>
+                        <input
+                          type="text"
+                          name="name"
+                          value={formData.name}
+                          onChange={handleChange}
+                          className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white/80 outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-300 transition-all text-sm"
+                          required
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-600 mb-1.5">Phone Number</label>
+                        <input
+                          type="tel"
+                          name="phone"
+                          value={formData.phone}
+                          onChange={handleChange}
+                          className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white/80 outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-300 transition-all text-sm"
+                          required
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-600 mb-1.5">Blood Group</label>
+                        <select
+                          name="bloodGroup"
+                          value={formData.bloodGroup}
+                          onChange={handleChange}
+                          className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white/80 outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-300 transition-all text-sm"
+                        >
+                          <option value="">Select Blood Group</option>
+                          {BLOOD_GROUPS.map((bg) => (
+                            <option key={bg} value={bg}>{bg}</option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-600 mb-1.5">ZIP Code</label>
+                        <input
+                          type="text"
+                          name="zipCode"
+                          value={formData.zipCode}
+                          onChange={handleChange}
+                          className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white/80 outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-300 transition-all text-sm"
+                        />
+                      </div>
+
+                      <div className="sm:col-span-2">
+                        <label className="block text-xs font-semibold text-slate-600 mb-1.5">Address</label>
+                        <input
+                          type="text"
+                          name="address"
+                          value={formData.address}
+                          onChange={handleChange}
+                          className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white/80 outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-300 transition-all text-sm"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-600 mb-1.5">City</label>
+                        <input
+                          type="text"
+                          name="city"
+                          value={formData.city}
+                          onChange={handleChange}
+                          className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white/80 outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-300 transition-all text-sm"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-600 mb-1.5">State</label>
+                        <input
+                          type="text"
+                          name="state"
+                          value={formData.state}
+                          onChange={handleChange}
+                          className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white/80 outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-300 transition-all text-sm"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex justify-end gap-3 pt-4 border-t border-slate-200/60">
+                      <button
+                        type="button"
+                        onClick={() => setIsEditing(false)}
+                        className="btn-modern secondary rounded-xl text-sm px-4 py-2"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={saving}
+                        className="btn-modern primary rounded-xl text-sm px-5 py-2"
+                      >
+                        {saving ? 'Saving...' : 'Save Changes'}
+                      </button>
+                    </div>
+                  </form>
+                </div>
               </div>
-              <div>
-                <p className="font-bold text-lg m-0 leading-tight">{action.label}</p>
-                <p className="text-white/80 text-sm mt-1 mb-0">Click to proceed</p>
+            ) : (
+              <div className="v2-panel overflow-hidden animate-fade-up">
+                <div className="px-6 py-4 flex items-center justify-between border-b border-slate-200/60">
+                  <div>
+                    <h2 className="text-base font-semibold text-slate-900">Account Details</h2>
+                    <p className="text-xs text-slate-500 mt-0.5">Your personal & location information</p>
+                  </div>
+                  <button onClick={() => setIsEditing(true)} className="section-link text-sm">
+                    Edit <ArrowRightIcon size={14} />
+                  </button>
+                </div>
+
+                <div className="p-5">
+                  <div className="space-y-2.5">
+                    {accountFields.map((field) => {
+                      const IconComponent = field.icon;
+                      const value = displayUser?.[field.key] || 'Not provided';
+                      return (
+                        <div
+                          key={field.key}
+                          className="flex items-center gap-3 rounded-xl border border-slate-200/70 bg-white/70 backdrop-blur px-4 py-3 shadow-sm transition-all duration-200 hover:shadow-md hover:border-slate-300"
+                        >
+                          <div className={`icon-box ${field.color}`} style={{ width: '36px', height: '36px', borderRadius: '10px', flexShrink: 0 }}>
+                            <IconComponent size={16} />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <div className="text-[10px] font-semibold text-slate-400 uppercase tracking-wide">{field.label}</div>
+                            <div className="text-sm font-semibold text-slate-800 truncate">{value}</div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Right: Quick Actions + Security */}
+          <div className="lg:col-span-2 space-y-5">
+            {/* Quick Actions */}
+            <div className="v2-panel p-5 animate-fade-up delay-5">
+              <h2 className="text-base font-semibold text-slate-900">Quick Actions</h2>
+              <p className="text-xs text-slate-500 mt-0.5">Jump to main flows</p>
+
+              <div className="mt-4 grid grid-cols-2 gap-3">
+                {quickActions.map((action) => (
+                  <button
+                    key={action.label}
+                    onClick={() => navigate(action.path)}
+                    className="group rounded-xl border border-slate-200 bg-white/70 backdrop-blur p-3 text-left shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md hover:border-slate-300"
+                  >
+                    <div className={`icon-box ${action.color}`} style={{ width: '36px', height: '36px', borderRadius: '10px' }}>
+                      <action.icon size={16} />
+                    </div>
+                    <div className="mt-2 text-sm font-semibold text-slate-800 leading-tight">{action.label}</div>
+                  </button>
+                ))}
               </div>
             </div>
-            <svg className="w-5 h-5 text-white/60 group-hover:text-white group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-          </a>
-        ))}
+
+            {/* Security Status */}
+            <div className="v2-panel p-5 animate-fade-up delay-6">
+              <h2 className="text-base font-semibold text-slate-900">Security Status</h2>
+              <p className="text-xs text-slate-500 mt-0.5">Account verification</p>
+
+              <div className="mt-4 space-y-2.5">
+                <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white/70 p-3">
+                  <div className={`icon-box ${displayUser?.isEmailVerified ? 'success' : 'warning'}`} style={{ width: '36px', height: '36px', borderRadius: '10px' }}>
+                    {displayUser?.isEmailVerified ? <CheckIcon size={16} /> : <AlertIcon size={16} />}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-semibold text-slate-800">Email Verification</div>
+                    <div className={`text-xs font-medium ${displayUser?.isEmailVerified ? 'text-emerald-600' : 'text-amber-600'}`}>
+                      {displayUser?.isEmailVerified ? 'Verified' : 'Not verified'}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white/70 p-3">
+                  <div className="icon-box success" style={{ width: '36px', height: '36px', borderRadius: '10px' }}>
+                    <CheckIcon size={16} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-semibold text-slate-800">Account Status</div>
+                    <div className="text-xs font-medium text-emerald-600">Active</div>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white/70 p-3">
+                  <div className={`icon-box ${completion >= 70 ? 'success' : 'warning'}`} style={{ width: '36px', height: '36px', borderRadius: '10px' }}>
+                    {completion >= 70 ? <CheckIcon size={16} /> : <ClockIcon size={16} />}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-semibold text-slate-800">Profile Completion</div>
+                    <div className={`text-xs font-medium ${completion >= 70 ? 'text-emerald-600' : 'text-amber-600'}`}>
+                      {completion}% complete
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
       </div>
-
     </div>
   );
 };
