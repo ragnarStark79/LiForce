@@ -18,8 +18,8 @@ const getHospitalIdString = (hospitalId) => {
 // Helper function to validate staff has hospitalId
 const validateStaffHospital = (req, res) => {
   if (!req.user.hospitalId) {
-    res.status(400).json({ 
-      message: 'Staff account not associated with any hospital. Please contact admin.' 
+    res.status(400).json({
+      message: 'Staff account not associated with any hospital. Please contact admin.'
     });
     return false;
   }
@@ -30,7 +30,7 @@ const validateStaffHospital = (req, res) => {
 export const getDashboard = async (req, res) => {
   try {
     if (!validateStaffHospital(req, res)) return;
-    
+
     const staffId = req.user._id;
     const hospitalId = req.user.hospitalId;
 
@@ -52,7 +52,7 @@ export const getDashboard = async (req, res) => {
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    
+
     const completedToday = await BloodRequest.countDocuments({
       hospitalId,
       status: 'COMPLETED',
@@ -102,7 +102,7 @@ export const getDashboard = async (req, res) => {
 export const getBloodRequests = async (req, res) => {
   try {
     if (!validateStaffHospital(req, res)) return;
-    
+
     const hospitalId = req.user.hospitalId;
     const { page = 1, limit = 10, status, urgency, bloodGroup, search } = req.query;
 
@@ -110,7 +110,7 @@ export const getBloodRequests = async (req, res) => {
     if (status && status !== '' && status !== 'all') query.status = status;
     if (urgency && urgency !== '' && urgency !== 'all') query.urgency = urgency;
     if (bloodGroup && bloodGroup !== '' && bloodGroup !== 'all') query.bloodGroup = bloodGroup;
-    
+
     // Search by patient name or requester name
     if (search && search.trim() !== '') {
       query.$or = [
@@ -144,7 +144,7 @@ export const getBloodRequests = async (req, res) => {
 export const createBloodRequest = async (req, res) => {
   try {
     if (!validateStaffHospital(req, res)) return;
-    
+
     const hospitalId = req.user.hospitalId;
     const staffId = req.user._id;
     const { patientId, bloodGroup, units, urgency, reason, notes, patientName: inputPatientName } = req.body;
@@ -194,7 +194,7 @@ export const createBloodRequest = async (req, res) => {
 export const assignRequest = async (req, res) => {
   try {
     if (!validateStaffHospital(req, res)) return;
-    
+
     const staffId = req.user._id;
     const { requestId } = req.params;
 
@@ -223,7 +223,7 @@ export const assignRequest = async (req, res) => {
 export const updateRequestStatus = async (req, res) => {
   try {
     if (!validateStaffHospital(req, res)) return;
-    
+
     const { requestId } = req.params;
     const { status, notes } = req.body;
 
@@ -261,7 +261,7 @@ export const updateRequestStatus = async (req, res) => {
 export const getInventory = async (req, res) => {
   try {
     if (!validateStaffHospital(req, res)) return;
-    
+
     const hospitalId = req.user.hospitalId;
 
     let inventory = await Inventory.find({ hospitalId })
@@ -292,7 +292,7 @@ export const getInventory = async (req, res) => {
 export const updateInventory = async (req, res) => {
   try {
     if (!validateStaffHospital(req, res)) return;
-    
+
     const hospitalId = req.user.hospitalId;
     const { bloodGroup, unitsAvailable, operation, units } = req.body;
 
@@ -335,7 +335,7 @@ export const updateInventory = async (req, res) => {
 export const bulkUpdateInventory = async (req, res) => {
   try {
     if (!validateStaffHospital(req, res)) return;
-    
+
     const hospitalId = req.user.hospitalId;
     const { updates } = req.body;
 
@@ -346,9 +346,9 @@ export const bulkUpdateInventory = async (req, res) => {
     const results = [];
     for (const update of updates) {
       const { bloodGroup, unitsAvailable } = update;
-      
+
       let inventory = await Inventory.findOne({ hospitalId, bloodGroup });
-      
+
       if (!inventory) {
         inventory = await Inventory.create({
           hospitalId,
@@ -362,7 +362,7 @@ export const bulkUpdateInventory = async (req, res) => {
         inventory.lastUpdatedBy = req.user._id;
         await inventory.save();
       }
-      
+
       results.push(inventory);
     }
 
@@ -377,12 +377,12 @@ export const bulkUpdateInventory = async (req, res) => {
 export const getPatients = async (req, res) => {
   try {
     if (!validateStaffHospital(req, res)) return;
-    
+
     const hospitalId = req.user.hospitalId;
     const { page = 1, limit = 10, search, bloodGroup } = req.query;
 
     const query = { hospitalId, isActive: true };
-    
+
     if (search && search.trim() !== '') {
       query.$or = [
         { name: { $regex: search, $options: 'i' } },
@@ -417,7 +417,7 @@ export const getPatients = async (req, res) => {
 export const searchPatients = async (req, res) => {
   try {
     if (!validateStaffHospital(req, res)) return;
-    
+
     const hospitalId = req.user.hospitalId;
     const { query: searchQuery } = req.query;
 
@@ -447,7 +447,7 @@ export const searchPatients = async (req, res) => {
 export const addPatient = async (req, res) => {
   try {
     if (!validateStaffHospital(req, res)) return;
-    
+
     const hospitalId = req.user.hospitalId;
     const { name, phone, email, age, gender, bloodGroup, address, city, state, medicalHistory, emergencyContact, notes } = req.body;
 
@@ -459,25 +459,25 @@ export const addPatient = async (req, res) => {
 
     const existingPatient = await Patient.findOne({ phone, hospitalId });
     if (existingPatient) {
-      return res.status(400).json({ 
-        message: 'A patient with this phone number already exists' 
+      return res.status(400).json({
+        message: 'A patient with this phone number already exists'
       });
     }
 
     const patient = await Patient.create({
-      name, 
-      phone, 
-      email, 
-      age: age || null, 
-      gender: gender || null, 
-      bloodGroup, 
-      address, 
-      city, 
+      name,
+      phone,
+      email,
+      age: age || null,
+      gender: gender || null,
+      bloodGroup,
+      address,
+      city,
       state,
       hospitalId,
       addedBy: req.user._id,
-      medicalHistory, 
-      emergencyContact, 
+      medicalHistory,
+      emergencyContact,
       notes,
       isActive: true
     });
@@ -493,7 +493,7 @@ export const addPatient = async (req, res) => {
 export const updatePatient = async (req, res) => {
   try {
     if (!validateStaffHospital(req, res)) return;
-    
+
     const { patientId } = req.params;
     const hospitalId = req.user.hospitalId;
 
@@ -516,7 +516,7 @@ export const updatePatient = async (req, res) => {
 export const deletePatient = async (req, res) => {
   try {
     if (!validateStaffHospital(req, res)) return;
-    
+
     const { patientId } = req.params;
     const hospitalId = req.user.hospitalId;
 
@@ -539,7 +539,7 @@ export const deletePatient = async (req, res) => {
 export const recordDonation = async (req, res) => {
   try {
     if (!validateStaffHospital(req, res)) return;
-    
+
     const hospitalId = req.user.hospitalId;
     const { donorId, bloodGroup, unitsDonated, donorWeight, donorBloodPressure, donorHemoglobin, relatedRequestId, notes } = req.body;
 
@@ -548,14 +548,14 @@ export const recordDonation = async (req, res) => {
     }
 
     const donation = await Donation.create({
-      donorId, 
-      hospitalId, 
-      bloodGroup, 
-      unitsDonated: parseInt(unitsDonated), 
-      donorWeight, 
-      donorBloodPressure, 
-      donorHemoglobin, 
-      relatedRequestId, 
+      donorId,
+      hospitalId,
+      bloodGroup,
+      unitsDonated: parseInt(unitsDonated),
+      donorWeight,
+      donorBloodPressure,
+      donorHemoglobin,
+      relatedRequestId,
       notes,
       donationDate: new Date()
     });
@@ -582,7 +582,7 @@ export const recordDonation = async (req, res) => {
 export const getDonationSchedules = async (req, res) => {
   try {
     if (!validateStaffHospital(req, res)) return;
-    
+
     const hospitalId = req.user.hospitalId;
     const { page = 1, limit = 10, status, date } = req.query;
 
@@ -602,7 +602,7 @@ export const getDonationSchedules = async (req, res) => {
       .populate('donorId', 'name email phone bloodGroup')
       .populate('assignedStaffId', 'name staffId phone')
       .populate('hospitalId', 'name')
-      .sort({ scheduledDate: 1, scheduledTime: 1 })
+      .sort({ createdAt: -1 })
       .limit(parseInt(limit))
       .skip((parseInt(page) - 1) * parseInt(limit));
 
@@ -614,8 +614,8 @@ export const getDonationSchedules = async (req, res) => {
     todayStart.setHours(0, 0, 0, 0);
     const todayEnd = new Date();
     todayEnd.setHours(23, 59, 59, 999);
-    const todayCount = await DonationSchedule.countDocuments({ 
-      hospitalId, 
+    const todayCount = await DonationSchedule.countDocuments({
+      hospitalId,
       scheduledDate: { $gte: todayStart, $lte: todayEnd },
       status: { $in: ['PENDING', 'ASSIGNED', 'CONFIRMED'] }
     });
@@ -640,7 +640,7 @@ export const getDonationSchedules = async (req, res) => {
 export const assignDonationSchedule = async (req, res) => {
   try {
     if (!validateStaffHospital(req, res)) return;
-    
+
     const staffId = req.user._id;
     const { scheduleId } = req.params;
 
@@ -674,7 +674,7 @@ export const assignDonationSchedule = async (req, res) => {
 export const updateDonationScheduleStatus = async (req, res) => {
   try {
     if (!validateStaffHospital(req, res)) return;
-    
+
     const { scheduleId } = req.params;
     const { status, notes } = req.body;
 
@@ -711,7 +711,7 @@ export const updateDonationScheduleStatus = async (req, res) => {
 export const completeDonationSchedule = async (req, res) => {
   try {
     if (!validateStaffHospital(req, res)) return;
-    
+
     const hospitalId = req.user.hospitalId;
     const { scheduleId } = req.params;
     const { unitsDonated, donorWeight, donorBloodPressure, donorHemoglobin, notes } = req.body;
@@ -740,8 +740,8 @@ export const completeDonationSchedule = async (req, res) => {
     });
 
     // Update user's last donation date
-    await User.findByIdAndUpdate(schedule.donorId._id, { 
-      lastDonationDate: new Date() 
+    await User.findByIdAndUpdate(schedule.donorId._id, {
+      lastDonationDate: new Date()
     });
 
     // Update inventory
@@ -757,10 +757,10 @@ export const completeDonationSchedule = async (req, res) => {
     schedule.completedAt = new Date();
     await schedule.save();
 
-    res.json({ 
-      message: 'Donation completed and recorded successfully', 
+    res.json({
+      message: 'Donation completed and recorded successfully',
       schedule,
-      donation 
+      donation
     });
   } catch (error) {
     console.error('Complete donation schedule error:', error);
@@ -800,8 +800,8 @@ export const updateProfile = async (req, res) => {
 
     // Check if there's already a pending update request
     if (user.profileUpdateStatus === 'PENDING') {
-      return res.status(400).json({ 
-        message: 'You already have a pending profile update request. Please wait for admin approval.' 
+      return res.status(400).json({
+        message: 'You already have a pending profile update request. Please wait for admin approval.'
       });
     }
 
@@ -820,7 +820,7 @@ export const updateProfile = async (req, res) => {
     if (hospitalId && hospitalId.toString() !== user.hospitalId?.toString()) pendingUpdate.hospitalId = hospitalId;
 
     // Check if there are any actual changes
-    const hasChanges = Object.keys(pendingUpdate).some(key => 
+    const hasChanges = Object.keys(pendingUpdate).some(key =>
       key !== 'requestedAt' && key !== 'reason'
     );
 
@@ -841,9 +841,9 @@ export const updateProfile = async (req, res) => {
       .populate('hospitalId', 'name address city state phone email code')
       .populate('pendingProfileUpdate.hospitalId', 'name city state code');
 
-    res.json({ 
+    res.json({
       message: 'Profile update request submitted successfully. Please wait for admin approval.',
-      user: updatedUser 
+      user: updatedUser
     });
   } catch (error) {
     console.error('Update profile error:', error);
@@ -873,9 +873,9 @@ export const cancelProfileUpdateRequest = async (req, res) => {
       .select('-password -refreshToken')
       .populate('hospitalId', 'name address city state phone email code');
 
-    res.json({ 
+    res.json({
       message: 'Profile update request cancelled successfully.',
-      user: updatedUser 
+      user: updatedUser
     });
   } catch (error) {
     console.error('Cancel profile update error:', error);

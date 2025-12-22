@@ -19,6 +19,8 @@ const DonationSchedulePage = () => {
   const [loading, setLoading] = useState(true);
   const [schedules, setSchedules] = useState([]);
   const [hospitals, setHospitals] = useState([]);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [showScheduleModal, setShowScheduleModal] = useState(false);
   const [formLoading, setFormLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -30,16 +32,17 @@ const DonationSchedulePage = () => {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [page]);
 
   const fetchData = async () => {
     try {
       setLoading(true);
       const [schedulesRes, hospitalsRes] = await Promise.all([
-        userService.getDonationSchedules(),
+        userService.getDonationSchedules({ page, limit: 20 }),
         userService.getHospitals(),
       ]);
       setSchedules(schedulesRes.schedules || []);
+      setTotalPages(schedulesRes.totalPages || 1);
       setHospitals(hospitalsRes.hospitals || []);
     } catch (error) {
       console.error('Failed to fetch data:', error);
@@ -322,13 +325,34 @@ const DonationSchedulePage = () => {
                             Cancel
                           </button>
                         )}
-
-                        {/* Booking is available via the header/empty-state CTA only */}
                       </div>
                     </div>
                   </div>
                 );
               })}
+
+              {/* Pagination Controls */}
+              {totalPages > 1 && (
+                <div className="p-4 flex items-center justify-between border-t border-slate-200/60 bg-slate-50/50">
+                  <button
+                    onClick={() => setPage(p => Math.max(1, p - 1))}
+                    disabled={page === 1}
+                    className="btn-modern secondary rounded-xl text-xs py-2 px-3 disabled:opacity-50"
+                  >
+                    Previous
+                  </button>
+                  <span className="text-xs font-medium text-slate-600">
+                    Page {page} of {totalPages}
+                  </span>
+                  <button
+                    onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                    disabled={page === totalPages}
+                    className="btn-modern secondary rounded-xl text-xs py-2 px-3 disabled:opacity-50"
+                  >
+                    Next
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </section>

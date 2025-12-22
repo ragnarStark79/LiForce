@@ -77,7 +77,7 @@ export const updateProfile = async (req, res) => {
 export const getSettings = async (req, res) => {
   try {
     const user = await User.findById(req.user._id).select('settings');
-    res.json({ 
+    res.json({
       settings: user?.settings || {
         emailNotifications: true,
         smsNotifications: true,
@@ -233,12 +233,12 @@ export const createDonationSchedule = async (req, res) => {
   try {
     const userId = req.user._id;
     const user = await User.findById(userId);
-    
+
     const { hospitalId, scheduledDate, scheduledTime, notes } = req.body;
 
     if (!hospitalId || !scheduledDate || !scheduledTime) {
-      return res.status(400).json({ 
-        message: 'Hospital, scheduled date, and time are required' 
+      return res.status(400).json({
+        message: 'Hospital, scheduled date, and time are required'
       });
     }
 
@@ -249,8 +249,8 @@ export const createDonationSchedule = async (req, res) => {
     });
 
     if (existingSchedule) {
-      return res.status(400).json({ 
-        message: 'You already have a pending donation schedule. Please cancel it first or wait for completion.' 
+      return res.status(400).json({
+        message: 'You already have a pending donation schedule. Please cancel it first or wait for completion.'
       });
     }
 
@@ -294,7 +294,7 @@ export const getDonationSchedules = async (req, res) => {
     const schedules = await DonationSchedule.find(query)
       .populate('hospitalId', 'name address city state phone')
       .populate('assignedStaffId', 'name phone')
-      .sort({ scheduledDate: -1 })
+      .sort({ createdAt: -1 })
       .limit(parseInt(limit))
       .skip((parseInt(page) - 1) * parseInt(limit));
 

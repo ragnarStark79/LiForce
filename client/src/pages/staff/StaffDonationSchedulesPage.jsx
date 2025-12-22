@@ -113,6 +113,8 @@ const StaffDonationSchedulesPage = () => {
   const { notify } = useNotification();
   const [loading, setLoading] = useState(true);
   const [schedules, setSchedules] = useState([]);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [stats, setStats] = useState({ pending: 0, today: 0 });
   const [filters, setFilters] = useState({
     status: 'all',
@@ -133,28 +135,23 @@ const StaffDonationSchedulesPage = () => {
   const [actionLoading, setActionLoading] = useState(false);
 
   useEffect(() => {
+    setPage(1); // Reset page on filter change
     fetchSchedules();
-    const timer = setInterval(() => setCurrentTime(new Date()), 60000); // Update clock every minute is enough for this view
-    // const poller = setInterval(() => fetchSchedules(true), 30000); // Poll every 30s
-    return () => {
-      clearInterval(timer);
-      // clearInterval(poller);
-    };
+    const timer = setInterval(() => setCurrentTime(new Date()), 60000);
+    return () => clearInterval(timer);
   }, [filters]);
+
+  useEffect(() => {
+    fetchSchedules();
+  }, [page]);
 
   const fetchSchedules = async (silent = false) => {
     try {
       if (!silent) setLoading(true);
-      const response = await staffService.getDonationSchedules(filters);
-      // Sort: Pending > Assigned > Confirmed > Newest
-      const sorted = (response.schedules || []).sort((a, b) => {
-        const priority = { 'PENDING': 4, 'ASSIGNED': 3, 'CONFIRMED': 2, 'COMPLETED': 1 };
-        const pA = priority[a.status] || 0;
-        const pB = priority[b.status] || 0;
-        if (pA !== pB) return pB - pA;
-        return new Date(b.createdAt || b.scheduledDate) - new Date(a.createdAt || a.scheduledDate);
-      });
-      setSchedules(sorted);
+      const response = await staffService.getDonationSchedules({ ...filters, page, limit: 10 });
+      // Use backend sort order (createdAt desc)
+      setSchedules(response.schedules || []);
+      setTotalPages(response.totalPages || 1);
       setStats(response.stats || { pending: 0, today: 0 });
     } catch (error) {
       console.error('Failed to fetch schedules:', error);
@@ -526,6 +523,28 @@ const StaffDonationSchedulesPage = () => {
               </table>
             )}
           </div>
+          {/* Pagination Controls */}
+          {totalPages > 1 && (
+            <div className="p-4 flex items-center justify-between border-t border-slate-200/60 bg-white/40">
+              <button
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+                disabled={page === 1}
+                className="px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-600 text-xs font-semibold hover:bg-slate-50 disabled:opacity-50 transition-colors shadow-sm"
+              >
+                Previous
+              </button>
+              <span className="text-xs font-medium text-slate-600">
+                Page {page} of {totalPages}
+              </span>
+              <button
+                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                disabled={page === totalPages}
+                className="px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-600 text-xs font-semibold hover:bg-slate-50 disabled:opacity-50 transition-colors shadow-sm"
+              >
+                Next
+              </button>
+            </div>
+          )}
         </GlassCard>
 
       </div>

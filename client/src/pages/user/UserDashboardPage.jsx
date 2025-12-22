@@ -148,7 +148,7 @@ const UserDashboardPage = () => {
       <div className="v2-container max-w-6xl mx-auto space-y-6 pb-10">
         {/* HERO: layered, premium */}
         <section className="v2-panel p-6 sm:p-8 animate-fade-up">
-          <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
+          <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6">
             <div className="min-w-0">
               <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-slate-200 bg-white/60 shadow-sm">
                 <span className="w-2 h-2 rounded-full" style={{ background: 'linear-gradient(135deg, #ef4444, #f97316)' }} />
@@ -243,157 +243,144 @@ const UserDashboardPage = () => {
           </div>
         </section>
 
-        {/* GRID: main content + right rail */}
-        <section className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* Left: activity */}
-          <div className="lg:col-span-8 space-y-6">
-            {/* Active Requests module */}
-            <div className="v2-panel overflow-hidden animate-fade-up delay-5">
-              <div className="px-6 py-5 flex items-center justify-between border-b border-slate-200/60">
+        {/* Quick Actions - Full Width Card */}
+        <section className="v2-panel p-6 animate-fade-up delay-1">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-base font-semibold text-slate-900">Quick Actions</h2>
+            <p className="text-xs text-slate-600">Shortcuts to your most used flows</p>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {quickActions.map((action) => (
+              <button
+                key={action.label}
+                onClick={() => navigate(action.path)}
+                className="group rounded-2xl border border-slate-200 bg-slate-50/50 p-4 text-left shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md hover:bg-white v2-tap"
+              >
+                <div className={`icon-box ${action.color}`}>
+                  <action.icon size={20} />
+                </div>
+                <div className="mt-3 text-sm font-semibold text-slate-900">{action.label}</div>
+                <div className="mt-1 text-xs text-slate-600">Open</div>
+              </button>
+            ))}
+          </div>
+        </section>
+
+        {/* Status Stack: Identity & Last Donation (Full Width) */}
+        <section className="space-y-6 animate-fade-up delay-2">
+          {/* Identity Card */}
+          <div className="v2-panel p-6 flex flex-col justify-center">
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex items-center gap-4">
+                <div
+                  className="blood-badge text-lg shrink-0"
+                  style={{ width: '58px', height: '58px', fontSize: '1.125rem' }}
+                  title={hasBloodType ? `Blood type: ${user?.bloodGroup}` : 'Blood type not set'}
+                >
+                  {user?.bloodGroup || '?'}
+                </div>
                 <div>
-                  <h2 className="text-base font-semibold text-slate-900">Active Requests</h2>
-                  <p className="text-xs text-slate-600 mt-1">Your most recent blood requests and urgency</p>
-                </div>
-                <button onClick={() => navigate('/user/blood-requests')} className="section-link">
-                  View all <ArrowRightIcon size={16} />
-                </button>
-              </div>
-
-              <div className="p-4 sm:p-5">
-                {dashboardData.activeRequests.length === 0 ? (
-                  <div className="rounded-2xl border border-dashed border-slate-200 bg-white/60 p-10 text-center">
-                    <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-white shadow-sm border border-slate-200">
-                      <DropletIcon size={26} />
-                    </div>
-                    <div className="text-sm font-semibold text-slate-900">No active requests</div>
-                    <div className="mt-1 text-xs text-slate-600">Create a request if you or someone near you needs blood.</div>
-                    <div className="mt-5">
-                      <button onClick={() => navigate('/user/blood-requests')} className="btn-modern primary rounded-2xl">
-                        <DropletIcon size={18} />
-                        Create request
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {dashboardData.activeRequests.slice(0, 3).map((request) => (
-                      <div
-                        key={request._id}
-                        className="group rounded-2xl border border-slate-200/70 bg-white/70 backdrop-blur px-4 py-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
-                      >
-                        <div className="flex items-center justify-between gap-4">
-                          <div className="flex items-center gap-3 min-w-0">
-                            <div className="blood-badge" style={{ minWidth: 46, height: 46 }}>
-                              {request.bloodGroup}
-                            </div>
-                            <div className="min-w-0">
-                              <div className="text-sm font-semibold text-slate-900 truncate">
-                                {request.unitsRequired} units needed
-                              </div>
-                              <div className="mt-1 text-xs text-slate-600 truncate">
-                                {request.hospitalId?.name || 'Pending assignment'}
-                              </div>
-                            </div>
-                          </div>
-
-                          <div className="flex items-center gap-2">
-                            <span className={`status-badge ${request.urgency === 'CRITICAL' ? 'critical' : 'pending'}`}>
-                              {request.urgency === 'CRITICAL' && (
-                                <span className="status-dot error" style={{ width: '6px', height: '6px' }} />
-                              )}
-                              {request.urgency}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Context card: blood type + profile */}
-            <div className="v2-panel p-6 animate-fade-up delay-6">
-              <div className="flex items-start sm:items-center justify-between gap-4 flex-col sm:flex-row">
-                <div className="flex items-center gap-4">
-                  <div
-                    className="blood-badge text-lg"
-                    style={{ width: '58px', height: '58px', fontSize: '1.125rem' }}
-                    title={hasBloodType ? `Blood type: ${user?.bloodGroup}` : 'Blood type not set'}
-                  >
-                    {user?.bloodGroup || '?'}
-                  </div>
-                  <div>
-                    <div className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Identity</div>
-                    <div className="mt-1 text-base font-semibold text-slate-900">Your blood type</div>
-                    <div className="mt-1 text-sm text-slate-600">
-                      {hasBloodType ? user?.bloodGroup : 'Not set — update your profile to personalize matches.'}
-                    </div>
+                  <div className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Identity</div>
+                  <div className="mt-1 text-base font-semibold text-slate-900">Your blood type</div>
+                  <div className="mt-1 text-sm text-slate-600">
+                    {hasBloodType ? user?.bloodGroup : 'Not set — update your profile.'}
                   </div>
                 </div>
-
-                <button onClick={() => navigate('/user/profile')} className="btn-modern secondary rounded-2xl">
-                  Edit profile <ArrowRightIcon size={18} />
-                </button>
               </div>
+              <button onClick={() => navigate('/user/profile')} className="btn-modern secondary rounded-xl p-2 h-auto w-auto">
+                <ArrowRightIcon size={18} />
+              </button>
             </div>
           </div>
 
-          {/* Right: actions rail */}
-          <aside className="lg:col-span-4 space-y-6">
-            <div className="v2-panel p-6 animate-fade-up delay-5">
-              <div className="flex items-center justify-between">
-                <h2 className="text-base font-semibold text-slate-900">Quick Actions</h2>
-              </div>
-              <p className="mt-1 text-xs text-slate-600">Shortcuts to your most used flows</p>
+          {/* Last Donation */}
+          <div className="v2-panel p-6 flex flex-col justify-center">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-base font-semibold text-slate-900">Last Donation</h2>
+              <button onClick={() => navigate('/user/donations')} className="section-link text-xs">
+                History <ArrowRightIcon size={14} />
+              </button>
+            </div>
 
-              <div className="mt-4 grid grid-cols-2 gap-3">
-                {quickActions.map((action) => (
-                  <button
-                    key={action.label}
-                    onClick={() => navigate(action.path)}
-                    className="group rounded-2xl border border-slate-200 bg-white/70 backdrop-blur p-4 text-left shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md v2-tap"
-                  >
-                    <div className={`icon-box ${action.color}`}>
-                      <action.icon size={20} />
+            <div className="rounded-xl border border-slate-200 bg-slate-50/50 p-3">
+              {dashboardData.lastDonation ? (
+                <div className="flex items-center justify-between gap-4">
+                  <div className="min-w-0">
+                    <div className="text-sm font-semibold text-slate-900 truncate">Donation recorded</div>
+                    <div className="mt-0.5 text-xs text-slate-600">
+                      {formatDate(dashboardData.lastDonation.date || dashboardData.lastDonation.createdAt || dashboardData.lastDonation.updatedAt)}
                     </div>
-                    <div className="mt-3 text-sm font-semibold text-slate-900">{action.label}</div>
-                    <div className="mt-1 text-xs text-slate-600">Open</div>
+                  </div>
+                  <div className="icon-box success scale-90" title="Thank you">
+                    <GiftIcon size={18} />
+                  </div>
+                </div>
+              ) : (
+                <div className="text-sm text-slate-600">
+                  No donations recorded yet.
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
+
+        {/* Active Requests - Full Width */}
+        <section className="v2-panel overflow-hidden animate-fade-up delay-3">
+          <div className="px-6 py-5 flex items-center justify-between border-b border-slate-200/60">
+            <div>
+              <h2 className="text-base font-semibold text-slate-900">Active Requests</h2>
+              <p className="text-xs text-slate-600 mt-1">Your most recent blood requests and urgency</p>
+            </div>
+            <button onClick={() => navigate('/user/blood-requests')} className="section-link">
+              View all <ArrowRightIcon size={16} />
+            </button>
+          </div>
+
+          <div className="p-4 sm:p-5">
+            {dashboardData.activeRequests.length === 0 ? (
+              <div className="rounded-2xl border border-dashed border-slate-200 bg-white/60 p-8 text-center">
+                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-white shadow-sm border border-slate-200">
+                  <DropletIcon size={24} />
+                </div>
+                <div className="text-sm font-semibold text-slate-900">No active requests</div>
+                <div className="mt-1 text-xs text-slate-600">Create a request if you or someone near you needs blood.</div>
+                <div className="mt-4">
+                  <button onClick={() => navigate('/user/blood-requests')} className="btn-modern primary rounded-xl px-4 py-2 text-sm">
+                    Create request
                   </button>
+                </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                {dashboardData.activeRequests.slice(0, 3).map((request) => (
+                  <div
+                    key={request._id}
+                    className="group rounded-xl border border-slate-200/70 bg-white/70 backdrop-blur px-4 py-3 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="blood-badge scale-90" style={{ minWidth: 40, height: 40 }}>
+                          {request.bloodGroup}
+                        </div>
+                        <div className="min-w-0">
+                          <div className="text-sm font-semibold text-slate-900 truncate">
+                            {request.unitsRequired} units needed
+                          </div>
+                          <div className="text-xs text-slate-600 truncate">
+                            {request.hospitalId?.name || 'Pending assignment'}
+                          </div>
+                        </div>
+                      </div>
+
+                      <span className={`status-badge text-[10px] px-2 py-0.5 ${request.urgency === 'CRITICAL' ? 'critical' : 'pending'}`}>
+                        {request.urgency}
+                      </span>
+                    </div>
+                  </div>
                 ))}
               </div>
-            </div>
-
-            {/* Last donation (if available) */}
-            <div className="v2-panel p-6 animate-fade-up delay-6">
-              <div className="flex items-center justify-between">
-                <h2 className="text-base font-semibold text-slate-900">Last Donation</h2>
-                <button onClick={() => navigate('/user/donations')} className="section-link">
-                  History <ArrowRightIcon size={16} />
-                </button>
-              </div>
-
-              <div className="mt-4 rounded-2xl border border-slate-200 bg-white/70 p-4">
-                {dashboardData.lastDonation ? (
-                  <div className="flex items-center justify-between gap-4">
-                    <div className="min-w-0">
-                      <div className="text-sm font-semibold text-slate-900 truncate">Donation recorded</div>
-                      <div className="mt-1 text-xs text-slate-600">
-                        {formatDate(dashboardData.lastDonation.date || dashboardData.lastDonation.createdAt || dashboardData.lastDonation.updatedAt)}
-                      </div>
-                    </div>
-                    <div className="icon-box success" title="Thank you">
-                      <GiftIcon size={20} />
-                    </div>
-                  </div>
-                ) : (
-                  <div className="text-sm text-slate-600">
-                    No donations recorded yet. Schedule your first donation to start your journey.
-                  </div>
-                )}
-              </div>
-            </div>
-          </aside>
+            )}
+          </div>
         </section>
       </div>
     </div>
