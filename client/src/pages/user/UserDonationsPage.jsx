@@ -16,8 +16,9 @@ const UserDonationsPage = () => {
     try {
       setLoading(true);
       const data = await userService.getDonationHistory();
-      setDonations(data.donations || []);
-      const total = data.donations?.length || 0;
+      const sortedDonations = (data.donations || []).sort((a, b) => new Date(b.donationDate) - new Date(a.donationDate));
+      setDonations(sortedDonations);
+      const total = sortedDonations.length;
       const units = data.donations?.reduce((sum, d) => sum + (d.unitsDonated || 1), 0) || 0;
       setStats({ total, units, lives: total * 3 });
     } catch (error) {
@@ -58,8 +59,8 @@ const UserDonationsPage = () => {
       </div>
 
       {/* Status & Eligibility Card */}
-      <div className="bg-white rounded-2xl border border-gray-200 p-6 md:p-8 text-center shadow-sm hover:shadow-md transition-all duration-300 animate-fade-up" 
-           style={{ animationDelay: '0.2s' }}>
+      <div className="bg-white rounded-2xl border border-gray-200 p-6 md:p-8 text-center shadow-sm hover:shadow-md transition-all duration-300 animate-fade-up"
+        style={{ animationDelay: '0.2s' }}>
         <h3 className="text-base md:text-lg font-semibold text-gray-700 mb-4 flex items-center justify-center gap-2">
           <span className="text-xl">📅</span> Next Eligible Donation
         </h3>
@@ -91,11 +92,11 @@ const UserDonationsPage = () => {
               {nextDate.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
             </div>
             <p className="text-gray-500 text-sm">Keep resting! Your body needs time to recover.</p>
-            
+
             {/* Progress Bar */}
             <div className="max-w-md mx-auto mt-4">
               <div className="w-full bg-gray-200 rounded-full h-2.5">
-                <div 
+                <div
                   className="bg-linear-to-r from-rose-500 to-pink-500 h-2.5 rounded-full transition-all duration-500"
                   style={{
                     width: `${Math.min(
@@ -118,8 +119,8 @@ const UserDonationsPage = () => {
           { label: 'Volume', value: `${stats.units}ml`, color: 'from-blue-400 to-indigo-500', bgColor: 'bg-blue-50', icon: '💧', delay: '0.45s' },
           { label: 'Lives Saved', value: stats.lives, color: 'from-emerald-400 to-green-500', bgColor: 'bg-emerald-50', icon: '❤️', delay: '0.5s' },
         ].map((stat) => (
-          <div 
-            key={stat.label} 
+          <div
+            key={stat.label}
             className={`${stat.bgColor} rounded-xl p-4 md:p-5 border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1 animate-fade-up`}
             style={{ animationDelay: stat.delay }}
           >
@@ -152,8 +153,8 @@ const UserDonationsPage = () => {
 
         <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
           {donations.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 md:py-16 text-center px-4 animate-fade-up" 
-                 style={{ animationDelay: '0.6s' }}>
+            <div className="flex flex-col items-center justify-center py-12 md:py-16 text-center px-4 animate-fade-up"
+              style={{ animationDelay: '0.6s' }}>
               <div className="w-20 h-20 md:w-24 md:h-24 bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl flex items-center justify-center text-4xl md:text-5xl mb-6 shadow-sm animate-bounce-slow">
                 📭
               </div>
@@ -161,7 +162,7 @@ const UserDonationsPage = () => {
               <p className="text-gray-500 max-w-md text-sm md:text-base mb-6">
                 Schedule your first donation to begin your life-saving journey!
               </p>
-              <a href="/user/schedule-donation" 
+              <a href="/user/schedule-donation"
                 className="px-6 py-3 bg-linear-to-r from-rose-600 to-pink-600 text-white text-sm md:text-base font-semibold rounded-xl 
                           hover:from-rose-700 hover:to-pink-700 transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105 inline-flex items-center gap-2">
                 <span>🩸</span> Start your journey
@@ -170,7 +171,7 @@ const UserDonationsPage = () => {
           ) : (
             <div className="divide-y divide-gray-100">
               {donations.map((donation, index) => (
-                <div 
+                <div
                   key={donation._id || index}
                   className="p-5 hover:bg-gray-50 transition-all duration-300 animate-fade-up group"
                   style={{ animationDelay: `${0.6 + index * 0.05}s` }}
@@ -189,16 +190,16 @@ const UserDonationsPage = () => {
                             </span>
                             <span className={`px-2.5 py-1 rounded-lg text-xs font-semibold uppercase tracking-wide transition-all duration-300
                                             ${donation.status === 'COMPLETED' ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200' :
-                                donation.status === 'PENDING' ? 'bg-amber-100 text-amber-700 hover:bg-amber-200' : 
+                                donation.status === 'PENDING' ? 'bg-amber-100 text-amber-700 hover:bg-amber-200' :
                                   'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}>
                               {donation.status}
                             </span>
                           </div>
-                          
+
                           <p className="text-sm text-gray-500 flex items-center gap-2">
                             <span className="text-gray-400">📅</span>
-                            {new Date(donation.donationDate).toLocaleDateString(undefined, { 
-                              weekday: 'short', year: 'numeric', month: 'long', day: 'numeric' 
+                            {new Date(donation.donationDate).toLocaleDateString(undefined, {
+                              weekday: 'short', year: 'numeric', month: 'long', day: 'numeric'
                             })}
                           </p>
                         </div>
@@ -206,12 +207,12 @@ const UserDonationsPage = () => {
 
                       <div className="flex items-center gap-4 text-sm">
                         <span className="flex items-center gap-1.5 text-gray-600 bg-gray-100 px-3 py-1.5 rounded-lg hover:bg-gray-200 transition-colors">
-                          <span className="text-base">⚖️</span> 
+                          <span className="text-base">⚖️</span>
                           <span className="font-medium">{donation.unitsDonated || 1} Unit{donation.unitsDonated > 1 ? 's' : ''}</span>
                         </span>
                         {donation.status === 'COMPLETED' && (
                           <span className="flex items-center gap-1.5 text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-lg">
-                            <span className="text-base">❤️</span> 
+                            <span className="text-base">❤️</span>
                             <span className="font-medium">{(donation.unitsDonated || 1) * 3} Lives Saved</span>
                           </span>
                         )}
@@ -227,8 +228,8 @@ const UserDonationsPage = () => {
 
       {/* Motivational Footer */}
       {donations.length > 0 && (
-        <div className="bg-linear-to-r from-indigo-50 via-purple-50 to-pink-50 rounded-2xl p-6 md:p-8 text-center border border-gray-200 animate-fade-up" 
-             style={{ animationDelay: '0.7s' }}>
+        <div className="bg-linear-to-r from-indigo-50 via-purple-50 to-pink-50 rounded-2xl p-6 md:p-8 text-center border border-gray-200 animate-fade-up"
+          style={{ animationDelay: '0.7s' }}>
           <p className="text-lg md:text-xl font-semibold text-gray-800 mb-2">
             🎉 Thank you for being a hero!
           </p>

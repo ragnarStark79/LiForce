@@ -358,6 +358,60 @@ export const ZapIcon = ({ className = '', size = 24 }) => (
   </svg>
 );
 
+// Search icon
+export const SearchIcon = ({ className = '', size = 24 }) => (
+  <svg
+    className={className}
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <circle cx="11" cy="11" r="8" />
+    <line x1="21" y1="21" x2="16.65" y2="16.65" />
+  </svg>
+);
+
+// Filter icon
+export const FilterIcon = ({ className = '', size = 24 }) => (
+  <svg
+    className={className}
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
+  </svg>
+);
+
+// Refresh icon
+export const RefreshcwIcon = ({ className = '', size = 24 }) => (
+  <svg
+    className={className}
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M23 4v6h-6" />
+    <path d="M1 20v-6h6" />
+    <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+  </svg>
+);
+
 // Export all icons as a collection
 export const Icons = {
   Heart: HeartIcon,
@@ -379,6 +433,9 @@ export const Icons = {
   Activity: ActivityIcon,
   Server: ServerIcon,
   Zap: ZapIcon,
+  Search: SearchIcon,
+  Filter: FilterIcon,
+  Refreshcw: RefreshcwIcon,
 };
 
 export default Icons;
