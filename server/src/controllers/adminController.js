@@ -16,9 +16,9 @@ export const getDashboard = async (req, res) => {
     const totalBloodRequests = await BloodRequest.countDocuments();
     const pendingBloodRequests = await BloodRequest.countDocuments({ status: 'PENDING' });
     const totalDonations = await Donation.countDocuments({ status: 'COMPLETED' });
-    const pendingProfileUpdates = await User.countDocuments({ 
-      role: 'STAFF', 
-      profileUpdateStatus: 'PENDING' 
+    const pendingProfileUpdates = await User.countDocuments({
+      role: 'STAFF',
+      profileUpdateStatus: 'PENDING'
     });
 
     res.json({
@@ -89,12 +89,12 @@ export const approveStaff = async (req, res) => {
 
     // Admin can approve any staff - NO hospital check
     staff.status = 'APPROVED';
-    
+
     // Generate permanent staff ID only if not already assigned
     if (!staff.staffId && staff.hospitalId && staff.hospitalId.code) {
       staff.staffId = generateStaffId(staff.hospitalId.code);
     }
-    
+
     await staff.save();
 
     res.json({ message: 'Staff approved successfully', staff });
@@ -138,7 +138,7 @@ export const getAllStaff = async (req, res) => {
 
     // Admin can filter by hospital optionally, but sees all by default
     const query = { role: 'STAFF', status: 'APPROVED' };
-    
+
     if (hospitalId && hospitalId !== 'all') {
       query.hospitalId = hospitalId;
     }
@@ -225,9 +225,9 @@ export const toggleUserStatus = async (req, res) => {
     user.isActive = !user.isActive;
     await user.save();
 
-    res.json({ 
-      message: `User ${user.isActive ? 'activated' : 'deactivated'} successfully`, 
-      user 
+    res.json({
+      message: `User ${user.isActive ? 'activated' : 'deactivated'} successfully`,
+      user
     });
   } catch (error) {
     console.error('Toggle user status error:', error);
@@ -272,7 +272,7 @@ export const getAllHospitals = async (req, res) => {
 export const getHospital = async (req, res) => {
   try {
     const adminUser = await User.findById(req.user.userId).populate('hospitalId');
-    
+
     if (!adminUser.hospitalId) {
       return res.status(404).json({ message: 'No hospital assigned to admin' });
     }
@@ -287,21 +287,52 @@ export const getHospital = async (req, res) => {
 // Create Hospital (renamed from addHospital for consistency)
 export const createHospital = async (req, res) => {
   try {
-    const { name, address, city, state, phone, email, type, services } = req.body;
+    const {
+      name,
+      code,
+      address,
+      city,
+      state,
+      zipCode,
+      phone,
+      email,
+      bloodBankCapacity,
+      departments,
+      emergencyContact,
+      website
+    } = req.body;
 
-    if (!name || !city || !state) {
-      return res.status(400).json({ message: 'Name, city, and state are required' });
+    // Validate required fields based on Schema
+    if (!name || !code || !email || !phone || !address || !city || !state) {
+      return res.status(400).json({
+        message: 'Required fields missing. Please provide name, code, email, phone, address, city, and state.'
+      });
+    }
+
+    // Check for existing hospital with same code or email
+    const existingHospital = await Hospital.findOne({
+      $or: [{ code }, { email }]
+    });
+
+    if (existingHospital) {
+      return res.status(400).json({
+        message: 'Hospital with this code or email already exists'
+      });
     }
 
     const hospital = await Hospital.create({
       name,
+      code,
+      email,
+      phone,
       address,
       city,
       state,
-      phone,
-      email,
-      type: type || 'HOSPITAL',
-      services: services || [],
+      zipCode,
+      bloodBankCapacity: bloodBankCapacity || 100,
+      departments: departments || [],
+      emergencyContact,
+      website,
       isActive: true
     });
 
@@ -313,38 +344,15 @@ export const createHospital = async (req, res) => {
 };
 
 // Add Hospital (alias for createHospital)
-export const addHospital = async (req, res) => {
-  try {
-    const { name, address, city, state, phone, email, type, services } = req.body;
 
-    if (!name || !city || !state) {
-      return res.status(400).json({ message: 'Name, city, and state are required' });
-    }
-
-    const hospital = await Hospital.create({
-      name,
-      address,
-      city,
-      state,
-      phone,
-      email,
-      type: type || 'HOSPITAL',
-      services: services || [],
-      isActive: true
-    });
-
-    res.status(201).json({ message: 'Hospital added successfully', hospital });
-  } catch (error) {
-    console.error('Add hospital error:', error);
-    res.status(500).json({ message: error.message });
-  }
-};
+// Add Hospital (alias for createHospital)
+export const addHospital = createHospital;
 
 // Update Hospital (admin's own hospital)
 export const updateHospital = async (req, res) => {
   try {
     const adminUser = await User.findById(req.user.userId);
-    
+
     if (!adminUser.hospitalId) {
       return res.status(404).json({ message: 'No hospital assigned to admin' });
     }
@@ -395,10 +403,10 @@ export const deleteHospital = async (req, res) => {
 
     // Check if any staff are assigned to this hospital
     const staffCount = await User.countDocuments({ hospitalId, role: 'STAFF' });
-    
+
     if (staffCount > 0) {
-      return res.status(400).json({ 
-        message: `Cannot delete hospital. ${staffCount} staff members are assigned to it. Please reassign them first.` 
+      return res.status(400).json({
+        message: `Cannot delete hospital. ${staffCount} staff members are assigned to it. Please reassign them first.`
       });
     }
 
@@ -553,8 +561,8 @@ export const getMetrics = async (req, res) => {
       donationsToday: await Donation.countDocuments({ createdAt: { $gte: today }, status: 'COMPLETED' }),
       donationsThisMonth: await Donation.countDocuments({ createdAt: { $gte: thisMonth }, status: 'COMPLETED' }),
       activeHospitals: await Hospital.countDocuments({ isActive: true }),
-      lowStockAlerts: await Inventory.countDocuments({ 
-        $expr: { $lte: ['$unitsAvailable', '$lowStockThreshold'] } 
+      lowStockAlerts: await Inventory.countDocuments({
+        $expr: { $lte: ['$unitsAvailable', '$lowStockThreshold'] }
       })
     };
 
@@ -569,7 +577,7 @@ export const getMetrics = async (req, res) => {
 export const getAnalytics = async (req, res) => {
   try {
     const { period = '30days' } = req.query;
-    
+
     let startDate = new Date();
     if (period === '7days') {
       startDate.setDate(startDate.getDate() - 7);
@@ -591,11 +599,11 @@ export const getAnalytics = async (req, res) => {
     // Donations over time
     const donationStats = await Donation.aggregate([
       { $match: { createdAt: { $gte: startDate }, status: 'COMPLETED' } },
-      { 
-        $group: { 
+      {
+        $group: {
           _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
           count: { $sum: 1 }
-        } 
+        }
       },
       { $sort: { _id: 1 } }
     ]);
@@ -603,11 +611,11 @@ export const getAnalytics = async (req, res) => {
     // Requests over time
     const requestStats = await BloodRequest.aggregate([
       { $match: { createdAt: { $gte: startDate } } },
-      { 
-        $group: { 
+      {
+        $group: {
           _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
           count: { $sum: 1 }
-        } 
+        }
       },
       { $sort: { _id: 1 } }
     ]);
@@ -615,11 +623,11 @@ export const getAnalytics = async (req, res) => {
     // User registrations over time
     const userStats = await User.aggregate([
       { $match: { createdAt: { $gte: startDate }, role: 'USER' } },
-      { 
-        $group: { 
+      {
+        $group: {
           _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
           count: { $sum: 1 }
-        } 
+        }
       },
       { $sort: { _id: 1 } }
     ]);
@@ -691,7 +699,7 @@ export const approveProfileUpdate = async (req, res) => {
 
     // Apply the pending updates to the staff profile
     const updates = staff.pendingProfileUpdate;
-    
+
     if (updates.name) staff.name = updates.name;
     if (updates.email) staff.email = updates.email;
     if (updates.phone) staff.phone = updates.phone;
@@ -706,9 +714,9 @@ export const approveProfileUpdate = async (req, res) => {
 
     await staff.save();
 
-    res.json({ 
-      message: 'Profile update approved and applied successfully', 
-      staff 
+    res.json({
+      message: 'Profile update approved and applied successfully',
+      staff
     });
   } catch (error) {
     console.error('Approve profile update error:', error);
@@ -739,9 +747,9 @@ export const rejectProfileUpdate = async (req, res) => {
 
     await staff.save();
 
-    res.json({ 
-      message: 'Profile update rejected', 
-      staff 
+    res.json({
+      message: 'Profile update rejected',
+      staff
     });
   } catch (error) {
     console.error('Reject profile update error:', error);

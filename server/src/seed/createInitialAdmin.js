@@ -16,7 +16,7 @@ const createDemoAccounts = async () => {
       hospital = await Hospital.create({
         name: 'LifeForce General Hospital',
         code: 'HQ001',
-        email: 'admin@liforce.hospital',
+        email: 'hospital@liforce.hospital',
         phone: '+1234567890',
         address: '123 Health Street',
         city: 'Medical City',
@@ -30,13 +30,13 @@ const createDemoAccounts = async () => {
       console.log('⚠️  Hospital already exists');
     }
 
-    let admin = await User.findOne({ email: 'admin@liforce.com' });
+    let admin = await User.findOne({ email: 'ragnar@liforce.com' });
     if (!admin) {
       admin = await User.create({
         name: 'System Administrator',
-        email: 'admin@liforce.com',
-        password: 'Admin@123456',
-        phone: '+1234567890',
+        email: 'ragnar@liforce.com',
+        password: 'ragnar@123456',
+        phone: '+1234567980',
         role: 'ADMIN',
         status: 'APPROVED',
         hospitalId: hospital._id,
@@ -90,7 +90,8 @@ const createDemoAccounts = async () => {
     console.log('\n========================================');
     console.log('✓ Demo accounts created successfully!');
     console.log('========================================\n');
-    console.log('ADMIN: admin@liforce.com / Admin@123456');
+    console.log('ADMIN: ragnar@liforce.com / ragnar@123456');
+    // console.log('ADMIN: admin@liforce.com / Admin@123456');
     console.log('STAFF: staff@liforce.com / Staff@123456');
     console.log('USER:  user@liforce.com / User@123456\n');
 
